@@ -35,9 +35,6 @@ hostname
 ipc-utils
 keychain
 less
-libevent2.0_5
-libevent-devel
-libncurses-devel
 links
 login
 make
