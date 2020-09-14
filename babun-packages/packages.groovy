@@ -31,7 +31,11 @@ def initEnvironment() {
     File outputFolder = new File(this.args[1])
     if (!outputFolder.exists()) {
         outputFolder.mkdir()
-    }    
+        outputFolder.mkdirs()
+    }
+    if(!outputFolder.exists()){
+        throw new RuntimeException("Unable to create target folder [${outputFolder.getAbsolutePath()}]")
+    }
     return [confFolder, outputFolder]
 }
 
@@ -68,7 +72,7 @@ def downloadPackages(File confFolder, File outputFolder, String bitVersion) {
 def downloadSetupIni(String repository, String bitVersion, File outputFolder) {
     println "Downloading [setup.ini] from repository [${repository}]"
     String setupIniUrl = "${repository}/${bitVersion}/setup.ini"
-    String downloadSetupIni = "wget -l 2 -r -np -q --cut-dirs=3 -P " + outputFolder.getAbsolutePath() + " " + setupIniUrl    
+    String downloadSetupIni = "wget --no-check-certificate -l 2 -r -np -q --cut-dirs=3 -P " + outputFolder.getAbsolutePath() + " " + setupIniUrl    
     executeCmd(downloadSetupIni, 5)
     String setupIniContent = setupIniUrl.toURL().text
     return setupIniContent
@@ -108,9 +112,19 @@ def downloadRootPackage(String repo, String setupIni, String rootPkg, Set<String
 
 def buildPackageDependencyTree(String setupIni, String pkgName, Set<String> result) {
     String pkgInfo = parsePackageInfo(setupIni, pkgName)
-    result.add(pkgName)
+
     if (!pkgInfo) {
-        throw new RuntimeException("Cannot find dependencies of [${pkgName}]")
+        pkgInfo = setupIni?.split("(?=@ )")?.find() { it.contains("provides: ${pkgName}") }
+        if(!pkgInfo){
+            throw new RuntimeException("Cannot find dependencies of [${pkgName}]")
+        }
+        println "  Parsing virtual package [${pkgName}]"
+        String newPkgName=parsePackageName(pkgInfo);
+        println "    parsed as [${newPkgName}]"
+        result.add(newPkgName)
+
+    }else{
+        result.add(pkgName)
     }
     String[] deps = parsePackageRequires(pkgInfo)
     for (String dep : deps) {
@@ -125,6 +139,11 @@ def parsePackageRequires(String pkgInfo) {
     return requires?.replace("requires:", "")?.trim()?.split("\\s")
 }
 
+def parsePackageName(String pkgInfo) {
+    String name = pkgInfo?.split("\n")?.find() { it.startsWith("@ ") }
+    return name?.replace("@ ", "")?.trim()
+}
+
 def parsePackageInfo(String setupIni, String packageName) {
     return setupIni?.split("(?=@ )")?.find() { it.contains("@ ${packageName}") }
 }
@@ -137,7 +156,7 @@ def parsePackagePath(String pkgInfo) {
 
 def downloadPackage(String repositoryUrl, String packagePath, File outputFolder) {
     String packageUrl = repositoryUrl + packagePath
-    String downloadCommand = "wget -l 2 -r -np -q --cut-dirs=3 -P " + outputFolder.getAbsolutePath() + " " + packageUrl
+    String downloadCommand = "wget -l 2 -r -np -q --no-check-certificate --cut-dirs=3 -P " + outputFolder.getAbsolutePath() + " " + packageUrl
     if (executeCmd(downloadCommand, 5) != 0) {
         println "Could not download " + packageUrl
         return false
