@@ -30,7 +30,6 @@ def initEnvironment() {
     File confFolder = new File(this.args[0])
     File outputFolder = new File(this.args[1])
     if (!outputFolder.exists()) {
-        outputFolder.mkdir()
         outputFolder.mkdirs()
     }
     if(!outputFolder.exists()){
