@@ -23,6 +23,7 @@ source /usr/local/etc/babun.rc
 mkdir -p "$babun/home/core"
 /bin/cp -rf $src/.babunrc "$babun/home/core/.babunrc"
 
+echo "secureprotocol = TLSv1" >> /etc/wgetrc
 
 profiles=("/etc/bash.bashrc")
 for profile in "${profiles[@]}"; do	
