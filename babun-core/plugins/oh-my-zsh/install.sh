@@ -19,7 +19,9 @@ if [ ! -d "$dest" ]; then
 	mkdir -p "$dest"
     /bin/cp -rf "$src/." "$dest"
     /bin/cp "$dest/templates/zshrc.zsh-template" "$babun/home/.zshrc"
-    /bin/sed -i 's/ZSH_THEME=".*"/ZSH_THEME="babun"/' "$babun/home/.zshrc"
+    /bin/sed -i 's/ZSH_THEME=".*"/ZSH_THEME="babun-km"/' "$babun/home/.zshrc"
     /bin/cp -rf "$babun_source/babun-core/plugins/oh-my-zsh/src/babun.zsh-theme" "$dest/custom"
+    /bin/cp -rf "$babun_source/babun-core/plugins/oh-my-zsh/src/babun-km.zsh-theme" "$dest/custom"
+
 fi
 
