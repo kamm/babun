@@ -47,14 +47,7 @@ function get_newest_cygwin_version {
 
 function get_version_as_number {
 	version_string=$1
-	# first digit
-	major=$(( ${version_string%%.*}*100000 ))
-	# second digit (almost)
-	minor_tmp=${version_string%.*}
-	minor=$(( ${minor_tmp#*.}*1000 ))
-	# third digit
-	revision=$(( ${version_string##*.} ))
-	version_number=$(( $major + $minor + $revision ))
+    version_number=$(echo $version_string | sed "s/\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)\(\-\([0-9]*\)\)*/\1 \2 \3 \5/" | awk '{print $1*1000000000+$2*1000000+$3*1000+$4}')
 	echo "$version_number"
 }
 
