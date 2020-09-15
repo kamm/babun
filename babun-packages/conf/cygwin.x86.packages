@@ -1,6 +1,4 @@
 alternatives
-aspell
-aspell-en
 attr
 automake
 base-cygwin
@@ -26,7 +24,6 @@ gcc
 gcc-core
 gettext
 git
-git-svn
 gnutls
 grep
 groff
@@ -44,7 +41,6 @@ mintty
 nano
 nc
 ncurses
-ncursesw
 openssh
 openssl
 pcre
@@ -59,10 +55,10 @@ rsync
 run
 sed
 shutdown
-subversion
 tar
 terminfo
 time
+tmux
 tree
 util-linux
 unzip
