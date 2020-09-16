@@ -20,7 +20,11 @@ def execute() {
 
         // handle symlinks
         copySymlinksScripts(inputFolder, cygwinFolder)
-        findSymlinks(cygwinFolder)        
+        findSymlinks(cygwinFolder)
+        new AntBuilder().copy( 
+            file:"${repoFolder.absolutePath}/cygwin.version", 
+            tofile:"${outputFolder.absolutePath}/cygwin/usr/local/etc/babun/installed/cygwin" 
+        )
     } catch (Exception ex) {
         error("ERROR: Unexpected error occurred: " + ex + " . Quitting!", true)
         ex.printStackTrace()
@@ -89,7 +93,7 @@ def copySymlinksScripts(File inputFolder, File cygwinFolder) {
 def findSymlinks(File cygwinFolder) {
     String symlinksFindScript = "/etc/postinstall/symlinks_find.sh"
     String findSymlinksCmd = "${cygwinFolder.absolutePath}/bin/bash.exe --norc --noprofile \"${symlinksFindScript}\""
-    executeCmd(findSymlinksCmd, 10)
+    executeCmd(findSymlinksCmd, 100)
     new File(cygwinFolder, symlinksFindScript).renameTo(new File(cygwinFolder, symlinksFindScript + ".done"))
 }
 
@@ -98,7 +102,7 @@ def executeCmd(String command, int timeout) {
     def process = command.execute()
     addShutdownHook { process.destroy() }
     process.consumeProcessOutput(out, err)
-    process.waitForOrKill(timeout * 60000)
+    process.waitForOrKill(timeout*1000*60*10)
     assert process.exitValue() == 0
 }
 

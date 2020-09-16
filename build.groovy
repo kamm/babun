@@ -3,8 +3,8 @@ import static java.lang.System.*
 import static java.lang.System.getenv
 
 VERSION = new File("${getRoot()}/babun.version").text.trim()
-TEN_MINUTES = 10
-TWENTY_MINUTES = 20
+TEN_MINUTES = 1000
+TWENTY_MINUTES = 2000
 
 execute()
 
@@ -14,19 +14,30 @@ def execute() {
     String mode = this.args[0]
     if (mode == "clean") {
         doClean()
+    } else if (mode == "partclean") {
+        doPartClean()
     } else if (mode == "cygwin") {
-        doCygwin()
+        executeBabunCygwin()
     } else if (mode == "package") {
         doPackage()
     } else if (mode == "release") {
         doRelease()
+    } else if (mode == "dist") {
+        executeBabunDist()
+    } else if (mode == "core") {
+        executeBabunCore()
+    } else if (mode == "packages") {
+        executeBabunPackages()
+    } else if (mode == "cygwin") {
+        executeBabunCore()
     }
+    
     log "FINISHED"
 }
 
 def checkArguments() {
-    if (this.args.length != 1 || !this.args[0].matches("clean|cygwin|package|release")) {
-        err.println "Usage: build.groovy <clean|cygwin|package|release>"
+    if (this.args.length != 1 || !this.args[0].matches("clean|partclean|packages|cygwin|core|dist|package|release")) {
+        err.println "Usage: build.groovy <clean|partclean|packages|cygwin|core|dist|package|release>"
         exit(-1)
     }
 }
@@ -38,12 +49,25 @@ def initEnvironment() {
     }
 }
 
+def doPartClean() {
+    log "EXEC partclean"
+    File target = getTarget()
+    if (target.exists()) {
+        if (!(new File(target,"babun-core")).deleteDir()) {
+            throw new RuntimeException("Cannot delete target/babun-core folder")
+        }
+        if (!(new File(target,"babun-dist")).deleteDir()) {
+            throw new RuntimeException("Cannot delete target/babun-dist folder")
+        }
+    }
+}
+
 def doClean() {
     log "EXEC clean"
     File target = getTarget()
     if (target.exists()) {
         if (!target.deleteDir()) {
-            throw new RuntimeException("Cannot delete targe folder")
+            throw new RuntimeException("Cannot delete target folder")
         }
     }
 }
@@ -54,12 +78,6 @@ def doPackage() {
     executeBabunCygwin()
     executeBabunCore()
     executeBabunDist()
-}
-
-def doCygwin() {    
-    executeBabunPackages()    
-    boolean downloadOnly=true
-    executeBabunCygwin(downloadOnly)
 }
 
 def doRelease() {
@@ -82,6 +100,7 @@ def executeBabunPackages() {
 def executeBabunCygwin(boolean downloadOnly = false) {
     String module = "babun-cygwin"
     log "EXEC ${module}"
+    if (shouldSkipModule(module)) return
     File workingDir = new File(getRoot(), module);
     String input = workingDir.absolutePath
     String repo = new File(getTarget(), "babun-packages").absolutePath
@@ -101,7 +120,7 @@ def executeBabunCore() {
     String root = getRoot().absolutePath
     String cygwin = new File(getTarget(), "babun-cygwin/cygwin").absolutePath
     String out = new File(getTarget(), "${module}").absolutePath    
-    String branch = getenv("babun_branch") ? getenv("babun_branch") : "release"
+    String branch = getenv("babun_branch") ? getenv("babun_branch") : "master"
     println "Taking babun branch [${branch}]"
     def command = ["groovy.bat", "core.groovy", root, cygwin, out, branch]
     executeCmd(command, workingDir, TEN_MINUTES)
@@ -154,7 +173,7 @@ def executeCmd(List<String> command, File workingDir, int timeout) {
     Process process = processBuilder.start()
     addShutdownHook { process.destroy() }
     process.consumeProcessOutput(out, err)
-    process.waitForOrKill(timeout * 60000)
+    process.waitForOrKill(timeout*1000*60*10)
     assert process.exitValue() == 0
 }
 

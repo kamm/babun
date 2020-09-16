@@ -29,6 +29,10 @@ def initEnvironment() {
     File cygwinFolder = new File(this.args[1])
     File outputFolder = new File(this.args[2])
     String babunBranch = this.args[3]
+    println "cygwinFolder: ${cygwinFolder.getAbsolutePath()}"
+    println "rootFolder: ${rootFolder.getAbsolutePath()}"
+    println "outputFolder: ${outputFolder.getAbsolutePath()}"
+    println "babunBranch: ${babunBranch}"
     if (!outputFolder.exists()) {
         outputFolder.mkdir()
     }    
@@ -36,9 +40,11 @@ def initEnvironment() {
 }
 
 def copyCygwin(File rootFolder, File cygwinFolder, File outputFolder) {
+    println "Copying ${cygwinFolder.absolutePath} to ${outputFolder.absolutePath}/cygwin"
     new AntBuilder().copy( todir: "${outputFolder.absolutePath}/cygwin", quiet: true ) {
       fileset( dir: "${cygwinFolder.absolutePath}", defaultexcludes:"no" )
     }
+    println "Copying ${cygwinFolder.absolutePath} to ${outputFolder.absolutePath}/cygwin done"
 }
 
 // -----------------------------------------------------
@@ -58,7 +64,12 @@ def installCore(File outputFolder, String babunBranch) {
     String src = "/usr/local/etc/babun/source"
     String clone = "git clone https://github.com/kamm/babun.git ${src}"
     String checkout = "git --git-dir='${src}/.git' --work-tree='${src}' checkout ${babunBranch}"    
-    executeCmd("${bash} -c \"${sslVerify} 'false'; ${clone}; ${checkout}; ${sslVerify} 'true';\"", 5)
+    executeCmd("${bash} -c \"mkdir -p /usr/local/bin\"",5)
+    executeCmd("${bash} -c \"mkdir -p /usr/local/etc/babun\"",5)
+    executeCmd("${bash} -c \"${sslVerify} 'false'\"",5)
+    executeCmd("${bash} -c \"${clone}\"", 5)
+    executeCmd("${bash} -c \"${checkout}\"", 5)
+    executeCmd("${bash} -c \"${sslVerify} 'true'\"", 5)
     
     // remove windows new line feeds
     String dos2unix = "find /usr/local/etc/babun/source/babun-core -type f -exec dos2unix {} \\;"

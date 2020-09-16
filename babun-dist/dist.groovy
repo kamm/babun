@@ -39,12 +39,17 @@ def initEnvironment() {
     String version = this.args[3] as String
     if (!outputFolder.exists()) {
         outputFolder.mkdir()
-    }    
+    }
+    println "cygwinFolder: ${cygwinFolder}"
+    println "inputFolder: ${inputFolder}"
+    println "outputFolder: ${outputFolder}"
+    println "version: ${version}"
     return [cygwinFolder, inputFolder, outputFolder, version]
 }
 
 def copyCygwin(File cygwinFolder, File outputFolder) {
-    new AntBuilder().copy(todir: "${outputFolder.absolutePath}/.babun/cygwin", quiet: true) {
+    println "Copying ${cygwinFolder.absolutePath} to ${outputFolder.absolutePath}/.babun/cygwin"
+    new AntBuilder().copy(todir: "${outputFolder.absolutePath}/.babun/cygwin", quiet: false) {
         fileset(dir: "${cygwinFolder.absolutePath}", defaultexcludes:"no") {
             exclude(name: "Cygwin.bat")
             exclude(name: "Cygwin.ico")
@@ -54,18 +59,21 @@ def copyCygwin(File cygwinFolder, File outputFolder) {
 }
 
 def copyTools(File inputFolder, File outputFolder) {
+    println "Copying ${inputFolder.absolutePath}/tools to ${outputFolder.absolutePath}/.babun/tools"
     new AntBuilder().copy(todir: "${outputFolder.absolutePath}/.babun/tools", quiet: true) {
         fileset(dir: "${inputFolder.absolutePath}/tools", defaultexcludes:"no")
     }
 }
 
 def copyFonts(File inputFolder, File outputFolder) {
+    println "Copying ${inputFolder.absolutePath}/fonts to ${outputFolder.absolutePath}/.babun/fonts"
     new AntBuilder().copy(todir: "${outputFolder.absolutePath}/.babun/fonts", quiet: true) {
         fileset(dir: "${inputFolder.absolutePath}/fonts", defaultexcludes:"no")
     }
 }
 
 def copyStartScripts(File inputFolder, File outputFolder) {
+    println "Copying ${inputFolder.absolutePath}/start to ${outputFolder.absolutePath}/.babun"
     new AntBuilder().copy(todir: "${outputFolder.absolutePath}/.babun", quiet: true) {
         fileset(dir: "${inputFolder.absolutePath}/start", defaultexcludes:"no")
     }
@@ -98,11 +106,13 @@ def createBabunDist(File outputFolder, String version) {
     dist.renameTo(distWithVersion)
 
     // zip dist folder
+    /*
     new AntBuilder().zip(destFile: "${outputFolder.absolutePath}/babun-${version}-dist.zip", level: 3) {
         fileset(dir: "${outputFolder.absolutePath}", defaultexcludes:"no") {
             include(name: "babun-${version}/**")
         }
     }
+    */
 }
 
 def error(String message, boolean noPrefix = false) {
@@ -114,6 +124,6 @@ def executeCmd(String command, int timeout) {
     def process = command.execute()
     addShutdownHook { process.destroy() }
     process.consumeProcessOutput(out, err)
-    process.waitForOrKill(timeout * 60000)
+    process.waitForOrKill(timeout*1000*60*10)
     assert process.exitValue() == 0
 }

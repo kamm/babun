@@ -52,6 +52,9 @@ def downloadPackages(File confFolder, File outputFolder, String bitVersion) {
     def processed = [] as Set
     for (repo in repositories) {
         String setupIni = downloadSetupIni(repo, bitVersion, outputFolder)
+        new File(outputFolder,"cygwin.version").withWriter('utf-8') { 
+            writer -> writer.writeLine(getCygwinVersion(setupIni)) 
+        } 
         for (String rootPkg : rootPackages) {
             if (processed.contains(rootPkg.trim())) continue
             def processedInStep = downloadRootPackage(repo, setupIni, rootPkg.trim(), processed, outputFolder)
@@ -138,6 +141,11 @@ def parsePackageRequires(String pkgInfo) {
     return requires?.replace("requires:", "")?.trim()?.split("\\s")
 }
 
+def getCygwinVersion(String setupIni){
+    String version = setupIni?.split("(?=@)")?.find(){it.startsWith("@ cygwin")}.split("\n").find(){it.startsWith("version: ")}.replace("version:","").trim();
+    return version
+}
+
 def parsePackageName(String pkgInfo) {
     String name = pkgInfo?.split("\n")?.find() { it.startsWith("@ ") }
     return name?.replace("@ ", "")?.trim()
@@ -167,7 +175,7 @@ int executeCmd(String command, int timeout) {
     def process = command.execute()
     addShutdownHook { process.destroy() }
     process.consumeProcessOutput(out, err)
-    process.waitForOrKill(timeout * 60000)
+    process.waitForProcessOutput()
     return process.exitValue()
 }
 
