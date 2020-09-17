@@ -14,5 +14,3 @@ fi
 if [[ ! -f "$homedir/.minttyrc" ]]; then
 	touch "$homedir/.minttyrc"
 fi
-
-echo "export DISPLAY=:0" >> $homedir/.zshrc
