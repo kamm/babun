@@ -6,6 +6,8 @@ source "$babun_tools/script.sh"
 src="$babun_source/babun-core/plugins/xserver/src/."
 dest="$babun/home/xserver"
 
-pact install xorg-server xinit xorg-docs
+echo "export DISPLAY=:0" >> "$babun/home/.zshrc"
+mkdir "$babun/home/.ssh"
+echo "ForwardX11Trusted yes" >> "$babun/.ssh/config"
 
 /bin/cp -rf "$src/" "$dest"
