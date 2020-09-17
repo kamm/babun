@@ -19,10 +19,6 @@ if [ ! -d "$homedir/.Xresources" ]; then
     dos2unix "$homedir/.Xresources" 
     
 fi
+mkdir "$homedir/.ssh"
+echo "ForwardX11Trusted yes" >> "$homedir/.ssh/config"
 
-# if startxwin not installed
-if [ ! -d "$homedir/.startxwinrc" ]; then        
-    # installing startxwin
-    /bin/cp -rf "$src/.startxwinrc" "$homedir/.startxwinrc" 
-    dos2unix "$homedir/.startxwinrc" 
-fi

@@ -7,7 +7,5 @@ src="$babun_source/babun-core/plugins/xserver/src/."
 dest="$babun/home/xserver"
 
 echo "export DISPLAY=:0" >> "$babun/home/.zshrc"
-mkdir "$babun/home/.ssh"
-echo "ForwardX11Trusted yes" >> "$babun/home/.ssh/config"
 
 /bin/cp -rf "$src/" "$dest"
