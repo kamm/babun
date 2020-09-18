@@ -107,8 +107,9 @@ if exist "%BABUN_HOME%/*.*" (
 if not exist "%BABUN_HOME%" (mkdir "%BABUN_HOME%" || goto :ERROR)
 ECHO [babun] Unzipping 
 
-"%UNZIPPER%" x "%BABUN_7Z%" -y -o"%TARGET%"
+"%UNZIPPER%" x "%BABUN_7Z%" -y -o"%TARGET%" >NUL 2>NUL
 if not exist "%BABUN_HOME%/*.*" (GOTO ERROR)
+ECHO [babun] Unzipping done
 
 :POSTINSTALL
 set SETPATH_SCRIPT=%BABUN_HOME%\tools\setpath.vbs
@@ -146,6 +147,7 @@ cscript //NoLogo "%LINK_SCRIPT%" "%USERPROFILE%\Desktop\Start XServer.lnk" "%BAB
 :INSTALLED
 ECHO [babun] Babun installed successfully. You can delete the installer now.
 ECHO [babun] Enjoy! Babun Team (http://babun.github.io).
+pause
 
 :RUN
 ECHO [babun] Starting babun

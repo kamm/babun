@@ -9,14 +9,14 @@ src="$babun/home/xserver"
 if [ ! -d "$homedir/.XWinrc" ]; then        
     # installing XWinrc
     /bin/cp -rf "$src/.XWinrc" "$homedir/.XWinrc" 
-    dos2unix "$homedir/.XWinrc"     
+    dos2unix "$homedir/.XWinrc" >/dev/null 2>&1
 fi
 
 # if Xresources not installed
 if [ ! -d "$homedir/.Xresources" ]; then        
     # installing Xresources
     /bin/cp -rf "$src/.Xresources" "$homedir/.Xresources" 
-    dos2unix "$homedir/.Xresources" 
+    dos2unix "$homedir/.Xresources" >/dev/null 2>&1
     
 fi
 mkdir "$homedir/.ssh"
