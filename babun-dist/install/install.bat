@@ -115,7 +115,7 @@ set SETPATH_SCRIPT=%BABUN_HOME%\tools\setpath.vbs
 set LINK_SCRIPT=%BABUN_HOME%\tools\link.vbs
 
 ECHO [babun] Running post-installation scripts. It may take a while...
-"%CYGWIN_HOME%"\bin\dash.exe -c "/usr/bin/rebaseall " || goto :ERROR
+"%CYGWIN_HOME%"\bin\dash.exe -c "/usr/bin/rebaseall " >NUL 2>NUL || goto :ERROR
 "%CYGWIN_HOME%"\bin\bash.exe --norc --noprofile -c "/usr/local/etc/babun/source/babun-core/tools/post_extract.sh" || goto :ERROR
 rem execute any command with -l (login) to run the post-installation scripts
 "%CYGWIN_HOME%"\bin\bash.exe -l -c "date" || goto :ERROR

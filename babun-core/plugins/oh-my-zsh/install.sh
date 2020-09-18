@@ -8,11 +8,11 @@ src="$babun/external/oh-my-zsh"
 dest="$babun/home/oh-my-zsh/.oh-my-zsh"
 
 if [ ! -d "$src" ]; then
-	PATH=/usr/bin git clone https://github.com/robbyrussell/oh-my-zsh.git "$src" 
-	git --git-dir="$src/.git" --work-tree="$src" config core.trustctime false 
-	git --git-dir="$src/.git" --work-tree="$src" config core.autocrlf false 
-	git --git-dir="$src/.git" --work-tree="$src" rm --cached -r . > /dev/null
-	git --git-dir="$src/.git" --work-tree="$src" reset --hard 
+	PATH=/usr/bin git clone https://github.com/robbyrussell/oh-my-zsh.git "$src"  >/dev/null 2>&1
+	git --git-dir="$src/.git" --work-tree="$src" config core.trustctime false >/dev/null 2>&1
+	git --git-dir="$src/.git" --work-tree="$src" config core.autocrlf false >/dev/null 2>&1
+	git --git-dir="$src/.git" --work-tree="$src" rm --cached -r . >/dev/null 2>&1
+	git --git-dir="$src/.git" --work-tree="$src" reset --hard >/dev/null 2>&1
 fi
 
 if [ ! -d "$dest" ]; then
