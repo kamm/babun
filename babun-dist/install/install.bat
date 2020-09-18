@@ -5,8 +5,8 @@ set SCRIPT_PATH=%~dp0
 set SCRIPT_PATH=%SCRIPT_PATH:\=/%
 set CUSTOM=false
 set INSTALLER_PATH=
-set BABUN_ZIP=%SCRIPT_PATH%/dist/babun.zip
-set UNZIPPER=%SCRIPT_PATH%/dist/unzip.exe
+set BABUN_7Z=%SCRIPT_PATH%/dist/babun.7z
+set UNZIPPER=%SCRIPT_PATH%/dist/7z.exe
 set FREESPACE_SCRIPT=%SCRIPT_PATH%/dist/freespace.vbs
 set LOG_FILE=%SCRIPT_PATH%/installer.log
 
@@ -59,9 +59,9 @@ if defined istext (
     GOTO CHECKHOME
 )
 
-if %FREE_SPACE% lss 1024 (
+if %FREE_SPACE% lss 2048 (
 	ECHO [babun] ERROR: There is not enough space on your destination drive %DRIVE_LETTER%
-	ECHO [babun] ERROR: Babun requires at least 1024 MB to operate properly
+	ECHO [babun] ERROR: Babun requires at least 2GB to operate properly
 	ECHO [babun] ERROR: Free Space on %DRIVE_LETTER% %FREE_SPACE% MB
 	ECHO [babun] ERROR: Please install babun to another destination using the /target option:
 	ECHO [babun] install.bat /target "D:\target_folder"
@@ -107,7 +107,7 @@ if exist "%BABUN_HOME%/*.*" (
 if not exist "%BABUN_HOME%" (mkdir "%BABUN_HOME%" || goto :ERROR)
 ECHO [babun] Unzipping 
 
-"%UNZIPPER%" "%BABUN_ZIP%" -d "%TARGET%"
+"%UNZIPPER%" x "%BABUN_7Z%" -y -o"%TARGET%"
 if not exist "%BABUN_HOME%/*.*" (GOTO ERROR)
 
 :POSTINSTALL
@@ -115,7 +115,7 @@ set SETPATH_SCRIPT=%BABUN_HOME%\tools\setpath.vbs
 set LINK_SCRIPT=%BABUN_HOME%\tools\link.vbs
 
 ECHO [babun] Running post-installation scripts. It may take a while...
-"%CYGWIN_HOME%"\bin\dash.exe -c "/usr/bin/rebaseall" || goto :ERROR
+"%CYGWIN_HOME%"\bin\dash.exe -c "/usr/bin/rebaseall " || goto :ERROR
 "%CYGWIN_HOME%"\bin\bash.exe --norc --noprofile -c "/usr/local/etc/babun/source/babun-core/tools/post_extract.sh" || goto :ERROR
 rem execute any command with -l (login) to run the post-installation scripts
 "%CYGWIN_HOME%"\bin\bash.exe -l -c "date" || goto :ERROR
@@ -134,11 +134,14 @@ if exist "%USERPROFILE%\Desktop\babun.lnk" (
     ECHO [babun] Deleting old desktop link
     DEL /F /Q "%USERPROFILE%\Desktop\babun.lnk"
 )
-ECHO [babun] Creating a desktop link
+ECHO [babun] Creating a desktop link for babun
 if not exist "%LINK_SCRIPT%" (
     ECHO [babun] ERROR: Cannot create a desktop link. Script not found!
 )
-cscript //Nologo "%LINK_SCRIPT%" "%USERPROFILE%\Desktop\babun.lnk" "%BABUN_HOME%"\cygwin\bin\mintty.exe
+cscript //Nologo "%LINK_SCRIPT%" "%USERPROFILE%\Desktop\Babun.lnk" "%BABUN_HOME%"\cygwin\bin\mintty.exe -
+
+ECHO [babun] Creating a desktop link for XServer
+cscript //NoLogo "%LINK_SCRIPT%" "%USERPROFILE%\Desktop\Start XServer.lnk" "%BABUN_HOME%\cygwin\bin\run.exe" "--quote /usr/bin/bash -l -c 'cd; /usr/bin/startxwin'"
 
 :INSTALLED
 ECHO [babun] Babun installed successfully. You can delete the installer now.
@@ -151,6 +154,7 @@ GOTO END
 
 :ERROR
 ECHO [babun] Terminating due to internal error #%errorlevel%
+pause
 EXIT /b %errorlevel%
 
 :END 

@@ -17,7 +17,7 @@ def execute() {
         // prepare Dist
         zipBabun(outputFolder)
         copyInstallScripts(inputFolder, outputFolder)
-        createBabunDist(outputFolder, version)        
+        createBabunDist(inputFolder, outputFolder, version)        
     } catch (Exception ex) {
         error("ERROR: Unexpected error occurred: " + ex + " . Quitting!", true)
         ex.printStackTrace()
@@ -80,16 +80,20 @@ def copyStartScripts(File inputFolder, File outputFolder) {
 }
 
 def zipBabun(File outputFolder) {
-    new AntBuilder().zip(destFile: "${outputFolder.absolutePath}/dist/dist/babun.zip", level: 9) {
+    /*new AntBuilder().zip(destFile: "${outputFolder.absolutePath}/dist/dist/babun.zip", level: 9) {
         fileset(dir: "${outputFolder.absolutePath}", defaultexcludes:"no") {
             include(name: '.babun/**')
         }
-    }
+    }*/
+	//7z a -t7z Files.7z -mx9 -aoa
+	def command = "7zip/7z.exe a -t7z ${outputFolder.absolutePath}/dist/dist/babun.7z -mx9 ${outputFolder.absolutePath}/.babun"
+	executeCmd(command, 60)
+
 }
 
 def copyInstallScripts(File inputFolder, File outputFolder) {
-    new AntBuilder().copy(todir: "${outputFolder.absolutePath}/dist/dist", quiet: true) {
-        fileset(dir: "${inputFolder.absolutePath}/install", defaultexcludes:"no") { include(name: "unzip.exe") }        
+	new AntBuilder().copy(todir: "${outputFolder.absolutePath}/dist/dist", quiet: true) {
+        fileset(dir: "${inputFolder.absolutePath}/7zip", defaultexcludes:"no") { include(name: "7z.*") }        
     }
     new AntBuilder().copy(todir: "${outputFolder.absolutePath}/dist/dist", quiet: true) {
         fileset(dir: "${inputFolder.absolutePath}/tools", defaultexcludes:"no") { include(name: "freespace.vbs") }
@@ -99,20 +103,17 @@ def copyInstallScripts(File inputFolder, File outputFolder) {
     }
 }
 
-def createBabunDist(File outputFolder, String version) {
+def createBabunDist(File inputFolder, File outputFolder, String version) {
     // rename dist folder
     File dist = new File(outputFolder, "dist")
     File distWithVersion = new File(outputFolder, "babun-${version}")
     dist.renameTo(distWithVersion)
-
-    // zip dist folder
-    /*
-    new AntBuilder().zip(destFile: "${outputFolder.absolutePath}/babun-${version}-dist.zip", level: 3) {
-        fileset(dir: "${outputFolder.absolutePath}", defaultexcludes:"no") {
-            include(name: "babun-${version}/**")
-        }
-    }
-    */
+	
+	
+	def zipCommand = "7zip\\7z.exe a -t7z ${outputFolder.absolutePath}\\babun.7z -mx0 ${outputFolder.absolutePath}\\babun-${version}"
+	executeCmd(zipCommand, 60)
+	def exeCommand = "cmd /c copy /y/b ${inputFolder.absolutePath}\\sfx\\7zsd.sfx+${inputFolder.absolutePath}\\sfx\\config.txt+${outputFolder.absolutePath}\\babun.7z ${outputFolder.absolutePath}\\babun-${version}.exe"
+	executeCmd(exeCommand, 60)
 }
 
 def error(String message, boolean noPrefix = false) {
@@ -120,7 +121,7 @@ def error(String message, boolean noPrefix = false) {
 }
 
 def executeCmd(String command, int timeout) {
-    println("[babun] Executing [${command}]")
+    println "Executing: ${command}"
     def process = command.execute()
     addShutdownHook { process.destroy() }
     process.consumeProcessOutput(out, err)

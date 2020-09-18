@@ -1,0 +1,5 @@
+﻿;!@Install@!UTF-8!
+Title="Babun 1.3.0"
+BeginPrompt="Do you want to install Babun?"
+RunProgram="babun-1.3.0\install.bat"
+;!@InstallEnd@!
