@@ -29,7 +29,7 @@ def execute() {
     } else if (mode == "packages") {
         executeBabunPackages()
     } else if (mode == "cygwin") {
-        executeBabunCore()
+        executeBabunCygwin()
     }
     
     log "FINISHED"
