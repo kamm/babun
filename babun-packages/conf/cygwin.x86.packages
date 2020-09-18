@@ -65,5 +65,7 @@ unzip
 vim
 wget
 which
+xorg-server
+xinit
 zip
 zsh
