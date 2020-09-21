@@ -86,7 +86,7 @@ def zipBabun(File outputFolder) {
         }
     }*/
 	//7z a -t7z Files.7z -mx9 -aoa
-	def command = "7zip/7z.exe a -t7z ${outputFolder.absolutePath}/dist/dist/babun.7z -mx9 ${outputFolder.absolutePath}/.babun"
+	def command = "7zip-64/7z.exe a -t7z ${outputFolder.absolutePath}/dist/dist/babun.7z -mx9 ${outputFolder.absolutePath}/.babun"
 	executeCmd(command, 60)
 
 }
@@ -110,7 +110,7 @@ def createBabunDist(File inputFolder, File outputFolder, String version) {
     dist.renameTo(distWithVersion)
 	
 	
-	def zipCommand = "7zip\\7z.exe a -t7z ${outputFolder.absolutePath}\\babun.7z -mx0 ${outputFolder.absolutePath}\\babun-${version}"
+	def zipCommand = "7zip-64\\7z.exe a -t7z ${outputFolder.absolutePath}\\babun.7z -mx0 ${outputFolder.absolutePath}\\babun-${version}"
 	executeCmd(zipCommand, 60)
 	def exeCommand = "cmd /c copy /y/b ${inputFolder.absolutePath}\\sfx\\7zsd.sfx+${inputFolder.absolutePath}\\sfx\\config.txt+${outputFolder.absolutePath}\\babun.7z ${outputFolder.absolutePath}\\babun-${version}.exe"
 	executeCmd(exeCommand, 60)
