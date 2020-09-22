@@ -1,17 +1,8 @@
-function ret {
-        ret="$1"
-        if [ $ret -eq 0 ]; then
-                echo "V"
-        else
-                echo "X"
-        fi
-}
-
 function get_git_id {
 	(git id --simple 2>/dev/null) || ""
 }
 
-local return_code="%(?.%{$fg[green]%}V%{$reset_color%}.%{$fg[red]%}X%{$reset_color%})"
+local return_code="%(?.%{$fg[green]%}😎%{$reset_color%}.%{$fg[red]%}💩%{$reset_color%})"
 local git_id="$( (git id --simple 2>/dev/null) || echo "" )"
 function parse_git_dirty {
         gitst=$(git status --porcelain 2>/dev/null | wc -l)

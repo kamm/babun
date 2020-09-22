@@ -147,7 +147,9 @@ cscript //NoLogo "%LINK_SCRIPT%" "%USERPROFILE%\Desktop\Start XServer.lnk" "%BAB
 :INSTALLED
 ECHO [babun] Babun installed successfully. You can delete the installer now.
 ECHO [babun] Enjoy! Babun Team (http://babun.github.io).
-pause
+
+"%CYGWIN_HOME%"\bin\sleep.exe" 15
+
 
 :RUN
 ECHO [babun] Starting babun
