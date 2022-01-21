@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+#pmset -g batt | egrep "([0-9]+\%).*" -o --colour=auto | cut -f1 -d';'
+
+     discharging=$(wmic path Win32_Battery Get BatteryStatus 2>/dev/null | grep -q 1 && echo "true" || echo "false")
+     percentage=$(wmic path Win32_Battery Get EstimatedChargeRemaining /format:list 2>/dev/null | grep "Estimated" |  cut -d= -f2)
+
+if [ x"$discharging" = x"true" ]; then
+	echo "  $percentage"
+else
+	echo "⚡$percentage"
+fi
+
+

@@ -1,0 +1,1 @@
+wmic /namespace:\\\\ROOT\\OpenHardwareMonitor path Sensor get identifier, value | grep /intelcpu/0/temperature/0 | awk '{print $2}'

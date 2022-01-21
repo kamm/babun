@@ -19,6 +19,7 @@ diffutils
 dos2unix
 editrights
 findutils
+fzf
 gawk
 gcc
 gcc-core

@@ -74,7 +74,7 @@ def downloadPackages(File confFolder, File outputFolder, String bitVersion) {
 def downloadSetupIni(String repository, String bitVersion, File outputFolder) {
     println "Downloading [setup.ini] from repository [${repository}]"
     String setupIniUrl = "${repository}/${bitVersion}/setup.ini"
-    String downloadSetupIni = "wget --no-check-certificate -l 2 -r -np -q --cut-dirs=3 -P " + outputFolder.getAbsolutePath() + " " + setupIniUrl    
+    String downloadSetupIni = "wget -c --no-check-certificate -l 2 -r -np -q --cut-dirs=3 -P " + outputFolder.getAbsolutePath() + " " + setupIniUrl    
     executeCmd(downloadSetupIni, 5)
     String setupIniContent = setupIniUrl.toURL().text
     return setupIniContent
@@ -116,6 +116,7 @@ def buildPackageDependencyTree(String setupIni, String pkgName, Set<String> resu
     String pkgInfo = parsePackageInfo(setupIni, pkgName)
 
     if (!pkgInfo) {
+		pkgName=pkgName.replace("perl5_026","perl5_032")
         pkgInfo = setupIni?.split("(?=@ )")?.find() { it.contains("provides: ${pkgName}") }
         if(!pkgInfo){
             throw new RuntimeException("Cannot find dependencies of [${pkgName}]")
@@ -163,7 +164,7 @@ def parsePackagePath(String pkgInfo) {
 
 def downloadPackage(String repositoryUrl, String packagePath, File outputFolder) {
     String packageUrl = repositoryUrl + packagePath
-    String downloadCommand = "wget -l 2 -r -np -q --no-check-certificate --cut-dirs=3 -P " + outputFolder.getAbsolutePath() + " " + packageUrl
+    String downloadCommand = "wget -c -l 2 -r -np -q --no-check-certificate --cut-dirs=3 -P " + outputFolder.getAbsolutePath() + " " + packageUrl
     if (executeCmd(downloadCommand, 5) != 0) {
         println "Could not download " + packageUrl
         return false

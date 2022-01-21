@@ -1,0 +1,57 @@
+set tw=160
+set tabstop=4
+set softtabstop=4
+set shiftwidth=4
+set expandtab
+set smartindent
+set guicursor=
+"set relativenumber
+set nu
+set nohlsearch
+set noerrorbells
+set nowrap
+set ignorecase
+set smartcase
+set noswapfile
+set nobackup
+set undodir=~/.cache/nvim/undodir
+set undofile
+set incsearch
+set scrolloff=8
+set mouse-=a
+set no	list
+set showbreak=↪\ 
+set listchars=tab:→\ ,eol:↲,nbsp:␣,trail:•,extends:<,precedes:>,space:·
+"set colorcolumn=+1
+set colorcolumn=161
+set guicursor=i:block
+
+colorscheme gruvbox
+filetype indent plugin on
+syntax on
+
+nnoremap Y y$
+
+nnoremap n nzzzv
+nnoremap N Nzzzv
+nnoremap J mzJ`z
+
+inoremap , ,<c-g>u
+inoremap . .<c-g>u
+inoremap ! !<c-g>u
+inoremap ? ?<c-g>u
+inoremap [ [<c-g>u
+inoremap < <<c-g>u
+inoremap { {<c-g>u
+inoremap " "<c-g>u
+
+nnoremap Q gqq
+vnoremap Q gqq
+
+map <Up> g<Up>
+map <Down> g<Down>
+
+noremap x "_x
+noremap X "_X
+noremap <Del> "_x
+

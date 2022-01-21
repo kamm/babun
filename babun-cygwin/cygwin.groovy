@@ -85,7 +85,7 @@ def installCygwin(File cygwinInstaller, File repoFolder, File cygwinFolder, File
 }
 
 def copySymlinksScripts(File inputFolder, File cygwinFolder) {
-    new AntBuilder().copy(todir: "${cygwinFolder.absolutePath}/etc/postinstall", quiet: true) {
+	new AntBuilder().copy(todir: "${cygwinFolder.absolutePath}/etc/postinstall", quiet: true) {
         fileset(dir: "${inputFolder.absolutePath}/symlinks", defaultexcludes:"no")
     }    
 }
@@ -97,13 +97,13 @@ def findSymlinks(File cygwinFolder) {
     new File(cygwinFolder, symlinksFindScript).renameTo(new File(cygwinFolder, symlinksFindScript + ".done"))
 }
 
-def executeCmd(String command, int timeout) {
+int executeCmd(String command, int timeout) {
     println "Executing: ${command}"
     def process = command.execute()
     addShutdownHook { process.destroy() }
     process.consumeProcessOutput(out, err)
-    process.waitForOrKill(timeout*1000*60*10)
-    assert process.exitValue() == 0
+    process.waitForProcessOutput()
+    return process.exitValue()
 }
 
 def error(String message, boolean noPrefix = false) {

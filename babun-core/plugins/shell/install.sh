@@ -9,11 +9,8 @@ dest="$babun/home/shell/"
 /bin/cp -rf /etc/minttyrc /etc/minttyrc.old  || echo ""
 /bin/cp -rf $src/minttyrc /etc/minttyrc
 
-/bin/cp -rf /etc/nanorc /etc/nanorc.old  || echo ""
-/bin/cp -rf $src/nanorc /etc/nanorc
-
-/bin/cp -rf /etc/vimrc /etc/vimrc.old  || echo ""
-/bin/cp -rf $src/vimrc /etc/vimrc
+/bin/cp -rf /etc/zprofile /etc/zprofile.old || echo ""
+/bin/cp -rf $src/zprofile /etc/zprofile
 
 mkdir -p "$dest"
-/bin/cp -rf "$src/.vim" "$dest/.vim" 
+ 

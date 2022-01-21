@@ -47,6 +47,12 @@ def copyCygwin(File rootFolder, File cygwinFolder, File outputFolder) {
     println "Copying ${cygwinFolder.absolutePath} to ${outputFolder.absolutePath}/cygwin done"
 }
 
+def repairSymlinks(File outputFolder) {
+    String symlinksRepairScript = "/etc/postinstall/symlinks_repair.sh"
+    String repairSymlinksCmd = "${outputFolder.absolutePath}/cygwin/bin/bash.exe --norc --noprofile \"${symlinksRepairScript}\""
+    executeCmd(repairSymlinksCmd, 100)
+}
+
 // -----------------------------------------------------
 // TODO - EXTERNALIZE THE INSTALLATION OF THE BABUN CORE
 // THIS SHOULD BE A SEPARATE SHELL SCRIPT
@@ -55,7 +61,7 @@ def copyCygwin(File rootFolder, File cygwinFolder, File outputFolder) {
 def installCore(File outputFolder, String babunBranch) {    
     // rebase dll's
     executeCmd("${outputFolder.absolutePath}/cygwin/bin/dash.exe -c '/usr/bin/rebaseall'", 5)
-
+	repairSymlinks(outputFolder)
     // setup bash invoked
     String bash = "${outputFolder.absolutePath}/cygwin/bin/bash.exe -l"
 
