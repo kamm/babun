@@ -4,6 +4,8 @@ source "$babun_tools/script.sh"
 
 src="$babun_plugins/dotfiles/src"
 
+mkdir -p "$homedir/.local/bin"
+
 /bin/cp -rf "$src/minttyrc" "$homedir/.minttyrc"
 git clone https://github.com/morhetz/gruvbox.git "$homedir/.vim/pack/default/start/gruvbox"
 /bin/cp -rf "$src/vimrc" "$homedir/.vimrc"
