@@ -15,6 +15,6 @@ export WORKSPACE=/c/workspace
 
 alias rcmda='cygstart --action=runas cmd'
 alias rcmdaw='cygstart --action=runas -w cmd'
-alias rcmdw='cygstart -w cmd'
-alias rcmd='cygstart cmd'
+alias rcmdw='PROMPT="" cygstart -w cmd'
+alias rcmd='PROMPT="" cygstart cmd'
 
