@@ -6,7 +6,7 @@
 # tmux has-session -t _default || tmux new-session -s _default -d
 
 # present menu for user to choose which workspace to open
-NAME="Pluto"
+NAME="`hostname`"
 PS3="Please choose your session: "
 # shellcheck disable=SC2207
 cnt=$(tmux list-sessions -F "#S" 2>/dev/null| grep -e "^${NAME}$" | wc -l)
