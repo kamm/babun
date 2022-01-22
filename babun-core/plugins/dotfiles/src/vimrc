@@ -22,7 +22,7 @@ set mouse-=a
 set nolist
 set showbreak=↪\ 
 set listchars=tab:→\ ,eol:↲,nbsp:␣,trail:•,extends:<,precedes:>,space:·
-"set colorcolumn=+1
+set colorcolumn=+1
 set colorcolumn=161
 set guicursor=i:block
 

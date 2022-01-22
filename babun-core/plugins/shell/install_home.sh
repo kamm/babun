@@ -14,3 +14,4 @@ src="$babun/home/shell/"
 #if [[ ! -f "$homedir/.minttyrc" ]]; then
 #	touch "$homedir/.minttyrc"
 #fi
+

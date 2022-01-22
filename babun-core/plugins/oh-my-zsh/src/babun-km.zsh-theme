@@ -10,3 +10,11 @@ PROMPT='%{$fg[green]%}$HOST%{$fg[blue]%}{%c}\
 %{$fg[yellow]%}${git_id}%{$fg[red]%}» %{$reset_color%}'
 
 PROMPT2='%{$fg[red]%}\ %{$reset_color%}'
+
+export WORKSPACE=/c/workspace
+
+alias rcmda='cygstart --action=runas cmd'
+alias rcmdaw='cygstart --action=runas -w cmd'
+alias rcmdw='cygstart -w cmd'
+alias rcmd='cygstart cmd'
+

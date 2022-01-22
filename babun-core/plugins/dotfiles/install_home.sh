@@ -19,7 +19,6 @@ tar -xf "$src/apple.tar" -C "$homedir/.mintty/emojis"
 /bin/cp "$src/tp" "$homedir/.local/bin"
 /bin/cp "$src/tmux/tmux.conf.symlink" "$homedir/.config/tmux"
 /bin/cp "$src/tmux/base16.sh" "$homedir/.config/tmux"
-/bin/cp "$src/tmux/theme.sh" "$homedir/.config/tmux"
 
 ln -s "$homedir/.config/tmux/tmux.conf.symlink" "$homedir/.tmux.conf"
 

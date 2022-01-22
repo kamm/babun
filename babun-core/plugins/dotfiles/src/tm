@@ -1,40 +1,26 @@
 #!/usr/bin/env bash
 
-# abort if we're already inside a TMUX session
-[ "$TMUX" == "" ] || exit 0
 # startup a "default" session if non currently exists
 # tmux has-session -t _default || tmux new-session -s _default -d
 
 # present menu for user to choose which workspace to open
-NAME="`hostname`"
-PS3="Please choose your session: "
-# shellcheck disable=SC2207
-cnt=$(tmux list-sessions -F "#S" 2>/dev/null| grep -e "^${NAME}$" | wc -l)
-options=($(tmux list-sessions -F "#S" 2>/dev/null) "New Session")
-if [ "$cnt" -eq "0" ]; then
-	options=("Create ${NAME}" "$options")
-fi
-echo "Available sessions"
-echo "------------------"
-echo " "
-select opt in "${options[@]}"
-do
-	case $opt in
-		"New Session")
-			read -rp "Enter new session name: " SESSION_NAME
-			tmux new -s "$SESSION_NAME"
-			break
+
+NAME=$(hostname)
+options=$(echo -e "New session"; tmux has-session -t "${NAME}" 2>/dev/null || echo -e "Create ${NAME}"; echo $(tmux list-sessions -F "#S" 2>/dev/null) | xargs -n 1)
+
+choice=$(printf "%s" "$options" | fzf)
+
+case "$choice" in
+		"New session")
+			read -rp "Enter new session name: " NAME
+			tmux has-session -t "${NAME}" 2>/dev/null || tmux new-session -d -s "${NAME}"
+			tmux switch-client -t "${NAME}" 2>/dev/null || tmux attach-session -t "${NAME}"
 			;;
-		"zsh")
-			zsh --login
-			break;;
 		"Create ${NAME}")
-			tmux new -s "${NAME}" -c "cd /c/workspace"
-			break
+			tmux has-session -t "${NAME}" 2>/dev/null || tmux new-session -d -s "${NAME}" -c "$WORKSPACE"
+			tmux switch-client -t "${NAME}" 2>/dev/null || tmux attach-session -t "${NAME}"
 			;;
 		*)
-			tmux attach-session -t "$opt"
-			break
+			tmux switch-client -t "$choice" 2>/dev/null || tmux attach-session -t "$choice"
 			;;
 	esac
-done

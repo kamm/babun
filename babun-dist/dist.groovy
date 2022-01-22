@@ -17,7 +17,7 @@ def execute() {
         // prepare Dist
         zipBabun(outputFolder)
         copyInstallScripts(inputFolder, outputFolder)
-        createBabunDist(inputFolder, outputFolder, version)        
+        createBabunDist(inputFolder, outputFolder, version)   
     } catch (Exception ex) {
         error("ERROR: Unexpected error occurred: " + ex + " . Quitting!", true)
         ex.printStackTrace()
@@ -38,7 +38,7 @@ def initEnvironment() {
     File outputFolder = new File(this.args[2])
     String version = this.args[3] as String
     if (!outputFolder.exists()) {
-        outputFolder.mkdir()
+        outputFolder.mkdirs()
     }
     println "cygwinFolder: ${cygwinFolder}"
     println "inputFolder: ${inputFolder}"
@@ -112,8 +112,22 @@ def createBabunDist(File inputFolder, File outputFolder, String version) {
 	
 	def zipCommand = "7zip-64\\7z.exe a -t7z ${outputFolder.absolutePath}\\babun.7z -mx0 ${outputFolder.absolutePath}\\babun-${version}"
 	executeCmd(zipCommand, 60)
-	def exeCommand = "cmd /c copy /y/b ${inputFolder.absolutePath}\\sfx\\7zsd.sfx+${inputFolder.absolutePath}\\sfx\\config.txt+${outputFolder.absolutePath}\\babun.7z ${outputFolder.absolutePath}\\babun-${version}.exe"
+    generateConfigTxt(inputFolder, outputFolder, version)
+	def exeCommand = "cmd /c copy /y/b ${inputFolder.absolutePath}\\sfx\\7zsd.sfx+${outputFolder.absolutePath}\\sfx\\config.txt+${outputFolder.absolutePath}\\babun.7z ${outputFolder.absolutePath}\\babun-${version}.exe"
 	executeCmd(exeCommand, 60)
+}
+
+def generateConfigTxt(File inputFolder, File outputFolder, String version){
+    File inputFile = new File(inputFolder, "sfx/config.txt")
+    input = inputFile.text
+    println input
+    output = input.replace("%VERSION%", version)
+    println output
+    File outputFile = new File(outputFolder, "sfx/config.txt")
+    outputFile.getParentFile().mkdirs()
+    outputFile.withWriter('utf-8'){
+        writer -> writer.write output
+    }
 }
 
 def error(String message, boolean noPrefix = false) {

@@ -17,6 +17,11 @@ base0D='#6A9FB5' # - Functions, Methods, Attribute IDs, Headings
 base0E='#AA759F' # - Keywords, Storage, Selector, Markup Italic, Diff Changed
 base0F='#8F5536' # - Deprecated, Opening/Closing Embedded Language Tags, e.g. <? php ?>
 
+tm_sep_l_b="◀"
+tm_sep_l_t="❮"
+tm_sep_r_b="▶"
+tm_sep_r_t="❯"
+
 set -g status-left-length 32
 set -g status-right-length 150
 set -g status-interval 5
@@ -29,7 +34,7 @@ set-window-option -g window-status-format " #I #W"
 
 # active window title colors
 set-window-option -g window-status-current-style fg=$base0C,bg=$base00
-set-window-option -g window-status-current-format " #[bold]#W"
+set-window-option -g window-status-current-format " #[bold]$tm_sep_r_b #I #W $tm_sep_l_b"
 
 # pane border colors
 set-window-option -g pane-active-border-style fg=$base0C
@@ -48,12 +53,9 @@ set-window-option -g clock-mode-colour $base0C
 tm_session_name="#[default,bg=$base00,fg=$base0E] #S "
 set -g status-left "$tm_session_name"
 
-tm_temp="#[fg=$base0E,bg=$base00] #(temperature)°C"
+tm_temp="#[fg=$base0E,bg=$base00] #(temperature)"
 tm_battery="#[fg=$base0F,bg=$base00] #(battery)"
 tm_date="#[default,bg=$base00,fg=$base0C] %R"
 tm_host="#[fg=$base0E,bg=$base00] #h "
-#set -g status-right "$tm_tunes $tm_battery $tm_temp $tm_date $tm_host"
-set -g status-right "$tm_date $tm_host"
-
-#set -g @plugin 'tmux-plugins/tmux-resurrect'
-
+set -g status-right "$tm_tunes $tm_battery $tm_temp $tm_date $tm_host"
+#set -g status-right "$tm_date $tm_host"
