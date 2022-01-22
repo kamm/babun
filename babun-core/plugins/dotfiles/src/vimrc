@@ -14,19 +14,18 @@ set ignorecase
 set smartcase
 set noswapfile
 set nobackup
-set undodir=~/.cache/nvim/undodir
+set undodir=~/.cache/vim/undodir
 set undofile
 set incsearch
 set scrolloff=8
 set mouse-=a
-set no	list
+set nolist
 set showbreak=↪\ 
 set listchars=tab:→\ ,eol:↲,nbsp:␣,trail:•,extends:<,precedes:>,space:·
 "set colorcolumn=+1
 set colorcolumn=161
 set guicursor=i:block
 
-colorscheme gruvbox
 filetype indent plugin on
 syntax on
 
