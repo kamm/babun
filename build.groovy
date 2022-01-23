@@ -3,8 +3,6 @@ import static java.lang.System.*
 import static java.lang.System.getenv
 
 VERSION = new File("${getRoot()}/babun.version").text.trim()
-TEN_MINUTES = 1000
-TWENTY_MINUTES = 2000
 
 execute()
 
@@ -94,7 +92,7 @@ def executeBabunPackages() {
     String conf = new File(getRoot(), "${module}/conf/").absolutePath
     String out = new File(getTarget(), "${module}").absolutePath
     def command = ["groovy.bat", "packages.groovy", conf, out]
-    executeCmd(command, workingDir, TEN_MINUTES)
+    executeCmd(command, workingDir)
 }
 
 def executeBabunCygwin(boolean downloadOnly = false) {
@@ -109,7 +107,7 @@ def executeBabunCygwin(boolean downloadOnly = false) {
     String downOnly = downloadOnly as String
     println "Download only flag set to: ${downOnly}"
     def command = ["groovy.bat", "cygwin.groovy", repo, input, out, pkgs, downOnly]
-    executeCmd(command, workingDir, TEN_MINUTES)
+    executeCmd(command, workingDir)
 }
 
 def executeBabunCore() {
@@ -123,7 +121,7 @@ def executeBabunCore() {
     String branch = getenv("babun_branch") ? getenv("babun_branch") : "master"
     println "Taking babun branch [${branch}]"
     def command = ["groovy.bat", "core.groovy", root, cygwin, out, branch]
-    executeCmd(command, workingDir, TEN_MINUTES)
+    executeCmd(command, workingDir)
 }
 
 def executeBabunDist() {
@@ -135,7 +133,7 @@ def executeBabunDist() {
     String cygwin = new File(getTarget(), "babun-core/cygwin").absolutePath
     String out = new File(getTarget(), "${module}").absolutePath
     def command = ["groovy.bat", "dist.groovy", cygwin, input, out, VERSION]
-    executeCmd(command, workingDir, TEN_MINUTES)
+    executeCmd(command, workingDir)
 }
 
 def executeRelease() {
@@ -145,7 +143,7 @@ def executeRelease() {
     File artifact = new File(getTarget(), "babun-dist/babun-${VERSION}-dist.zip")
     def args = ["groovy", "babun-dist/release/release.groovy", "babun", "babun-dist", VERSION,
             artifact.absolutePath, getenv("bintray_user"), getenv("bintray_secret")]
-    executeCmd(args, getRoot(), TWENTY_MINUTES)
+    executeCmd(args, getRoot())
 }
 
 def shouldSkipModule(String module) {
@@ -167,13 +165,13 @@ File getRoot() {
     return new File(getClass().protectionDomain.codeSource.location.path).parentFile
 }
 
-def executeCmd(List<String> command, File workingDir, int timeout) {
+def executeCmd(List<String> command, File workingDir) {
     ProcessBuilder processBuilder = new ProcessBuilder(command)
     processBuilder.directory(workingDir)
     Process process = processBuilder.start()
     addShutdownHook { process.destroy() }
     process.consumeProcessOutput(out, err)
-    process.waitForOrKill(timeout*1000*60*10)
+    process.waitForProcessOutput()
     assert process.exitValue() == 0
 }
 
