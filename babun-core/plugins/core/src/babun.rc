@@ -16,6 +16,7 @@ alias egrep='egrep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias emacs=emacs-nox
 alias open='cygstart'
+alias mc='mc -b'
 unset GREP_OPTIONS
 
 # User Agent section -> especially for @aalmiray :)
