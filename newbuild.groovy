@@ -8,13 +8,13 @@ setupIniMap = [:]
 execute()
 def elapsedTime(String module, Closure closure){
     def timeStart = new Date()
-    println "${module} Starting at ${timeStart}"
+    info("${module} Starting at ${timeStart}")
     closure()
     def timeStop = new Date()
-    println "${module} Started at ${timeStart}"
-    println "${module} Finished at ${timeStop}"
+    info("${module} Started at ${timeStart}")
+    info("${module} Finished at ${timeStop}")
     duration = TimeCategory.minus(timeStop, timeStart)
-    println "${module} Took ${duration}"
+    info("${module} Took ${duration}")
 
 }
 
@@ -34,7 +34,7 @@ def execute(){
     elapsedTime("[BABUN]"){
         elapsedTime("[PKGS]"){executePackages(packagesInput, packagesOutput, bitVersion)}
         elapsedTime("[CYGW]"){executeCygwin(packagesInput, packagesOutput, cygwinInput, cygwinOutput, bitVersion)}
-        elapsedTime("[CORE]"){executeCore(cygwinOutput, coreOutput, "master")}
+        elapsedTime("[CORE]"){executeCore(cygwinOutput, coreOutput, "master", bitVersion)}
         elapsedTime("[DIST]"){executeDist(coreOutput, distInput, distOutput, version,bitVersion)}
     }
 
@@ -108,7 +108,7 @@ def downloadSetupIni(String repository, String bitVersion, File outputFolder) {
 
 def downloadRootPackage(String repo, String setupIni, String rootPkg, Set<String> processed, File outputFolder) {
     def processedInStep = [] as Set
-    info("Processing top-level package [$rootPkg]")
+    //info("Processing top-level package [$rootPkg]")
     def packagesToProcess = [] as Set
     try {
         buildPackageDependencyTree(setupIni, rootPkg, packagesToProcess)
@@ -117,7 +117,7 @@ def downloadRootPackage(String repo, String setupIni, String rootPkg, Set<String
             String pkgInfo = parsePackageInfo(setupIni, pkg)
             String pkgPath = parsePackagePath(pkgInfo)
             if (pkgPath) {
-                info("  Downloading package [$pkg]")
+                //info("  Downloading package [$pkg]")
                 if (downloadPackage(repo, pkgPath, outputFolder)) {
                     processedInStep.add(pkg)
                 }
@@ -125,7 +125,7 @@ def downloadRootPackage(String repo, String setupIni, String rootPkg, Set<String
                 // packages doesn't have binary file
                 processedInStep.add(pkg)
             } else {
-                info("  Cannot find package [$pkg] in the repository")
+                info("Cannot find package [$pkg] in the repository")
                 processedInStep = [] as Set // reset as the tree could not be fetched
                 break;
             }
@@ -151,7 +151,7 @@ def buildPackageDependencyTree(String setupIni, String pkgName, Set<String> resu
         String newPkgName=parsePackageName(pkgInfo);
         info("    parsed as [${newPkgName}]")*/
         String newPkgName = parseVirtualPackage(pkgName)
-        info("  Parsing virtual package ${pkgName} as ${newPkgName}")
+        //info("  Parsing virtual package ${pkgName} as ${newPkgName}")
         result.add(newPkgName)
 
     }else{
@@ -190,7 +190,6 @@ def parsePackageName(String pkgInfo) {
 
 def parseSetupIni(String setupIni){
     splitted = setupIni.split("(?=@)")
-    println splitted.getClass()
     for(String packageInfo in splitted){
         setupIniMap[parsePackageName(packageInfo)]=packageInfo
     }
@@ -213,7 +212,7 @@ def downloadPackage(String repositoryUrl, String packagePath, File outputFolder)
     String outputPath = "${repoDomain}/${packagePath}"
     File outputFile = new File(outputFolder, outputPath)
     if(outputFile.exists()){
-        info("    File ${packagePath} exists")
+        //info("    File ${packagePath} exists")
         return true;
     }
     outputFile.getParentFile().mkdirs()
@@ -246,7 +245,7 @@ def executeCygwin(File packagesInput, File repoFolder, File inputFolder, File ou
         // install cygwin
         File cygwinInstaller = downloadCygwinInstaller(outputFolder, bitVersion)
         if(downloadOnly) {
-            println "downloadOnly flag set to true - Cygwin installation skipped.";
+            info("downloadOnly flag set to true - Cygwin installation skipped.")
             return
         }
         installCygwin(cygwinInstaller, repoFolder, cygwinFolder, pkgsFile)
@@ -269,23 +268,23 @@ def executeCygwin(File packagesInput, File repoFolder, File inputFolder, File ou
 def downloadCygwinInstaller(File outputFolder, String bitVersion) {    
     File cygwinInstaller = new File(outputFolder, "setup-${bitVersion}.exe")
     if(!cygwinInstaller.exists()) {
-        println "Downloading Cygwin installer"
+        info("Downloading Cygwin installer")
         cygwinInstaller.withOutputStream{
             out -> new URL( "http://cygwin.com/setup-${bitVersion}.exe").withInputStream{
                 in-> out<<in
             }
         }
     } else {
-        println "Cygwin installer alread exists, skipping the download!";
+        info("Cygwin installer alread exists, skipping the download!")
     }
 
     return cygwinInstaller
 }
 
 def installCygwin(File cygwinInstaller, File repoFolder, File cygwinFolder, File pkgsFile) {    
-    println "Installing cygwin"
+    info("Installing cygwin")
     String pkgs = pkgsFile.text.trim().replaceAll("(\\s)+", ",")    
-    println "Packages to install: ${pkgs}"
+    info("Packages to install: ${pkgs}")
     String installCommand = "\"${cygwinInstaller.absolutePath}\" " +
             "--quiet-mode " +
             "--local-install " +
@@ -295,7 +294,6 @@ def installCygwin(File cygwinInstaller, File repoFolder, File cygwinFolder, File
             "--no-startmenu " +
             "--no-desktop " +
             "--packages " + pkgs
-    println installCommand
     executeCmd(installCommand, 10)
 }
 
@@ -313,10 +311,9 @@ def findSymlinks(File cygwinFolder) {
 }
 
 int executeCmd(String command, int timeout) {
-    println "Executing: ${command}"
     def process = command.execute()
-    addShutdownHook { process.destroy() }
-    process.consumeProcessOutput(err, err)
+    //addShutdownHook { process.destroy() }
+    //process.consumeProcessOutput(err, err)
     process.waitForProcessOutput()
     return process.exitValue()
 }
@@ -324,10 +321,10 @@ int executeCmd(String command, int timeout) {
 
 
 //////CORE PART
-def executeCore(File cygwinFolder, File outputFolder, String babunBranch) {
+def executeCore(File cygwinFolder, File outputFolder, String babunBranch, String bitVersion) {
     try {
         copyCygwin(new File(cygwinFolder, "cygwin"), outputFolder, "cygwin")
-        installCore(outputFolder, babunBranch)    
+        installCore(outputFolder, babunBranch, bitVersion)
     } catch (Exception ex) {
         error("ERROR: Unexpected error occurred: " + ex + " . Quitting!")
         ex.printStackTrace()
@@ -346,8 +343,9 @@ def repairSymlinks(File outputFolder) {
 // THIS SHOULD BE A SEPARATE SHELL SCRIPT
 // IT WILL ENABLE INSTALLING THE CORE ON OSX!!!
 // -----------------------------------------------------
-def installCore(File outputFolder, String babunBranch) {
+def installCore(File outputFolder, String babunBranch, String bitVersion) {
     // rebase dll's
+    info("Installing babun core...")
     executeCmd("${outputFolder.absolutePath}/cygwin/bin/dash.exe -c '/usr/bin/rebaseall'", 5)
 	repairSymlinks(outputFolder)
     // setup bash invoked
@@ -374,7 +372,7 @@ def installCore(File outputFolder, String babunBranch) {
     executeCmd("${bash} -c \"${chmod}\"", 5)
 
     // invoke init.sh
-    executeCmd("${bash} \"/usr/local/etc/babun/source/babun-core/tools/init.sh\"", 5)
+    executeCmd("${bash} \"/usr/local/etc/babun/source/babun-core/tools/init.sh ${bitVersion}\"", 5)
 
     // run babun installer - yay!
     executeCmd("${bash} \"/usr/local/etc/babun/source/babun-core/plugins/install.sh\"", 5)
@@ -400,7 +398,7 @@ def executeDist(File cygwinFolder, File inputFolder, File outputFolder, String v
 }
 
 def copyCygwin(File cygwinFolder, File outputFolder, String targetPath) {
-    println "Copying ${cygwinFolder.absolutePath} to ${outputFolder.absolutePath}/.babun/cygwin"
+    info("Copying ${cygwinFolder.absolutePath} to ${outputFolder.absolutePath}/.babun/cygwin")
     new AntBuilder().copy(todir: "${outputFolder.absolutePath}/${targetPath}", quiet: false) {
         fileset(dir: "${cygwinFolder.absolutePath}", defaultexcludes:"no") {
             exclude(name: "Cygwin.bat")
@@ -411,21 +409,21 @@ def copyCygwin(File cygwinFolder, File outputFolder, String targetPath) {
 }
 
 def copyTools(File inputFolder, File outputFolder) {
-    println "Copying ${inputFolder.absolutePath}/tools to ${outputFolder.absolutePath}/.babun/tools"
+    //info("Copying ${inputFolder.absolutePath}/tools to ${outputFolder.absolutePath}/.babun/tools")
     new AntBuilder().copy(todir: "${outputFolder.absolutePath}/.babun/tools", quiet: true) {
         fileset(dir: "${inputFolder.absolutePath}/tools", defaultexcludes:"no")
     }
 }
 
 def copyFonts(File inputFolder, File outputFolder) {
-    println "Copying ${inputFolder.absolutePath}/fonts to ${outputFolder.absolutePath}/.babun/fonts"
+    //info("Copying ${inputFolder.absolutePath}/fonts to ${outputFolder.absolutePath}/.babun/fonts")
     new AntBuilder().copy(todir: "${outputFolder.absolutePath}/.babun/fonts", quiet: true) {
         fileset(dir: "${inputFolder.absolutePath}/fonts", defaultexcludes:"no")
     }
 }
 
 def copyStartScripts(File inputFolder, File outputFolder) {
-    println "Copying ${inputFolder.absolutePath}/start to ${outputFolder.absolutePath}/.babun"
+    //info("Copying ${inputFolder.absolutePath}/start to ${outputFolder.absolutePath}/.babun")
     new AntBuilder().copy(todir: "${outputFolder.absolutePath}/.babun", quiet: true) {
         fileset(dir: "${inputFolder.absolutePath}/start", defaultexcludes:"no")
     }
@@ -455,7 +453,7 @@ def createBabunDist(File inputFolder, File outputFolder, String version, String 
     File distWithVersion = new File(outputFolder, "babun-${version}")
     dist.renameTo(distWithVersion)
 	
-	
+    info("Finally, zipping babun...")	
 	def zipCommand = "${inputFolder.absolutePath}\\7zip-64\\7z.exe a -t7z ${outputFolder.absolutePath}\\babun.7z -mx0 ${outputFolder.absolutePath}\\babun-${version}"
 	executeCmd(zipCommand, 60)
     generateConfigTxt(inputFolder, outputFolder, version)
