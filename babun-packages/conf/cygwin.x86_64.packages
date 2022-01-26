@@ -45,12 +45,12 @@ nc
 ncurses
 openssh
 openssl
+p7zip
 pcre
 perl
 ping
 pkg-config
 procps
-readline
 rebase
 rsync
 run

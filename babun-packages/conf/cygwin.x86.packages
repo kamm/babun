@@ -45,6 +45,7 @@ nc
 ncurses
 openssh
 openssl
+p7zip
 pcre
 perl
 perl_vendor

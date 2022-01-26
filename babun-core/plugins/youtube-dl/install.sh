@@ -7,20 +7,20 @@ curl https://yt-dl.org/downloads/2021.12.17/youtube-dl.exe > /usr/local/bin/yout
 
 chmod 755 /usr/local/bin/yt-dlp.exe
 chmod 755 /usr/local/bin/youtube-dl.exe
+ffmpeg="ffmpeg-5.0-essentials_build.zip"
+curl https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-5.0-essentials_build.zip > /tmp/${ffmpeg} 2>/dev/null
 
-curl https://github.com/GyanD/codexffmpeg/releases/download/5.0/ffmpeg-5.0-essentials_build.zip > ffmpeg-5.0-essentials_build.zip
+unzip -j /tmp/${ffmpeg} ffmpeg-5.0-essentials_build/bin/ffmpeg.exe >/dev/null 2>&1
+unzip -j /tmp/${ffmpeg} ffmpeg-5.0-essentials_build/bin/ffprobe.exe >/dev/null 2>&1
+unzip -j /tmp/${ffmpeg} ffmpeg-5.0-essentials_build/bin/ffplay.exe >/dev/null 2>&1
 
-unzip -j ffmpeg-5.0-essentials_build.zip ffmpeg-5.0-essentials_build/bin/ffmpeg.exe
-unzip -j ffmpeg-5.0-essentials_build.zip ffmpeg-5.0-essentials_build/bin/ffprobe.exe
-unzip -j ffmpeg-5.0-essentials_build.zip ffmpeg-5.0-essentials_build/bin/ffplay.exe
-
-rm -f ffmpeg-5.0-essentials_build.zip
+rm -f /tmp/ffmpeg-5.0-essentials_build.zip
 
 mv ffprobe.exe ffplay.exe ffmpeg.exe /usr/local/bin
 
 chmod 775 /usr/local/bin/ffmpeg.exe
 chmod 775 /usr/local/bin/ffprobe.exe
-chmod 775 /usr/local/bin/ffpley.exe
+chmod 775 /usr/local/bin/ffplay.exe
 
 
 

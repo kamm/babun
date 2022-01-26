@@ -20,16 +20,16 @@ def elapsedTime(String module, Closure closure){
 
 def execute(){
     version = new File("${getRoot()}/babun.version").text.trim()
-    bitVersion = "x86"
+    bitVersion = "x86_64"
     
     File packagesInput  = new File(getRoot(), "babun-packages")
     File cygwinInput    = new File(getRoot(), "babun-cygwin")
     File distInput      = new File(getRoot(), "babun-dist")
     
     File packagesOutput = new File(getRoot(), "target/babun-packages")
-    File cygwinOutput   = new File(getRoot(), "target/babun-cygwin")
-    File coreOutput     = new File(getRoot(), "target/babun-core")
-    File distOutput     = new File(getRoot(), "target/babun-dist")
+    File cygwinOutput   = new File(getRoot(), "target/babun-cygwin-${bitVersion}")
+    File coreOutput     = new File(getRoot(), "target/babun-core-${bitVersion}")
+    File distOutput     = new File(getRoot(), "target/babun-dist-${bitVersion}")
     
     elapsedTime("[BABUN]"){
         elapsedTime("[PKGS]"){executePackages(packagesInput, packagesOutput, bitVersion)}
