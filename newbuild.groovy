@@ -310,9 +310,10 @@ def findSymlinks(File cygwinFolder) {
     new File(cygwinFolder, symlinksFindScript).renameTo(new File(cygwinFolder, symlinksFindScript + ".done"))
 }
 
-int executeCmd(String command, int timeout) {
+def executeCmd(String command, int timeout) {
+    //info("Executing ${command}")
     def process = command.execute()
-    //addShutdownHook { process.destroy() }
+    addShutdownHook { process.destroy() }
     //process.consumeProcessOutput(err, err)
     process.waitForProcessOutput()
     return process.exitValue()
@@ -372,7 +373,7 @@ def installCore(File outputFolder, String babunBranch, String bitVersion) {
     executeCmd("${bash} -c \"${chmod}\"", 5)
 
     // invoke init.sh
-    executeCmd("${bash} \"/usr/local/etc/babun/source/babun-core/tools/init.sh ${bitVersion}\"", 5)
+    executeCmd("${bash} \"/usr/local/etc/babun/source/babun-core/tools/init.sh\" ${bitVersion}", 5)
 
     // run babun installer - yay!
     executeCmd("${bash} \"/usr/local/etc/babun/source/babun-core/plugins/install.sh\"", 5)
