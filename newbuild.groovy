@@ -2,6 +2,7 @@
 import static java.lang.System.*
 import static groovy.io.FileType.*
 import groovy.time.*
+import groovy.ant.AntBuilder
 
 setupIniMap = [:]
 
@@ -20,10 +21,12 @@ def elapsedTime(String module, Closure closure){
 
 def execute(){
     version = new File("${getRoot()}/babun.version").text.trim()
+	build = "${new Date().format('yyyy-MM-dd')}"
     bitVersion = "x86_64"
     
-    File packagesInput  = new File(getRoot(), "babun-packages")
+	File packagesInput  = new File(getRoot(), "babun-packages")
     File cygwinInput    = new File(getRoot(), "babun-cygwin")
+	File coreInput      = new File(getRoot(), "babun-core")
     File distInput      = new File(getRoot(), "babun-dist")
     
     File packagesOutput = new File(getRoot(), "target/babun-packages")
@@ -34,8 +37,8 @@ def execute(){
     elapsedTime("[BABUN]"){
         elapsedTime("[PKGS]"){executePackages(packagesInput, packagesOutput, bitVersion)}
         elapsedTime("[CYGW]"){executeCygwin(packagesInput, packagesOutput, cygwinInput, cygwinOutput, bitVersion)}
-        elapsedTime("[CORE]"){executeCore(cygwinOutput, coreOutput, "master", bitVersion)}
-        elapsedTime("[DIST]"){executeDist(coreOutput, distInput, distOutput, version,bitVersion)}
+        elapsedTime("[CORE]"){executeCore(getRoot(), cygwinOutput, coreOutput, "master", bitVersion)}
+        elapsedTime("[DIST]"){executeDist(coreOutput, distInput, distOutput, "${version}-${build}",bitVersion)}
     }
 
  
@@ -67,6 +70,7 @@ def copyPackagesListToTarget(File packagesInput, File outputFolder, String bitVe
 def downloadPackages(File packagesInput, File outputFolder, String bitVersion) {
     File packagesFile = new File(packagesInput, "conf/cygwin.${bitVersion}.packages")
     def rootPackages = packagesFile.readLines().findAll() { it }
+	info(rootPackages.toString())
     def repositories = new File(packagesInput, "conf/cygwin.repositories").readLines().findAll() { it }
     def processed = [] as Set
     for (repo in repositories) {
@@ -76,6 +80,7 @@ def downloadPackages(File packagesInput, File outputFolder, String bitVersion) {
             writer -> writer.writeLine(getCygwinVersion(setupIni)) 
         } 
         for (String rootPkg : rootPackages) {
+			info("Downloading root package [${rootPkg}] and dependencies")
             if(rootPkg.trim().startsWith("#")) continue
             if (processed.contains(rootPkg.trim())) continue
             def processedInStep = downloadRootPackage(repo, setupIni, rootPkg.trim(), processed, outputFolder)
@@ -96,7 +101,7 @@ def downloadSetupIni(String repository, String bitVersion, File outputFolder) {
     info("Downloading [setup.ini] from repository [${repository}]")
     String setupIniUrl = "${repository}/${bitVersion}/setup.ini"
     String setupIniContent = setupIniUrl.toURL().text
-    String repoDomain = repository.replaceAll(/.*\/\/([a-z\.]+)\/.*/, '$1')
+    String repoDomain = repository.replaceAll(/.*\/\/([a-z\.-]+)\/.*/, '$1')
     File setupIni = new File(outputFolder,"${repoDomain}/${bitVersion}/setup.ini")
     setupIni.getParentFile().mkdirs()
     setupIni.withWriter{
@@ -117,13 +122,15 @@ def downloadRootPackage(String repo, String setupIni, String rootPkg, Set<String
             String pkgInfo = parsePackageInfo(setupIni, pkg)
             String pkgPath = parsePackagePath(pkgInfo)
             if (pkgPath) {
-                //info("  Downloading package [$pkg]")
+                info("  Downloading package [$pkg] to [$outputFolder]")
                 if (downloadPackage(repo, pkgPath, outputFolder)) {
                     processedInStep.add(pkg)
                 }
             } else if (pkgInfo) {
                 // packages doesn't have binary file
                 processedInStep.add(pkg)
+			} else if(pkg=="_windows"){
+				continue
             } else {
                 info("Cannot find package [$pkg] in the repository")
                 processedInStep = [] as Set // reset as the tree could not be fetched
@@ -140,18 +147,18 @@ def downloadRootPackage(String repo, String setupIni, String rootPkg, Set<String
 
 def buildPackageDependencyTree(String setupIni, String pkgName, Set<String> result) {
     String pkgInfo = parsePackageInfo(setupIni, pkgName)
-
     if (!pkgInfo) {
-		/*pkgName=pkgName.replace("perl5_026","perl5_032")
-        pkgInfo = setupIni?.split("(?=@ )")?.find() { it.contains("provides: ${pkgName}") }
-        if(!pkgInfo){
-            throw new RuntimeException("Cannot find dependencies of [${pkgName}]")
-        }
-        info("  Parsing virtual package [${pkgName}]")
-        String newPkgName=parsePackageName(pkgInfo);
-        info("    parsed as [${newPkgName}]")*/
+				/*pkgName=pkgName.replace("perl5_026","perl5_032")
+				pkgInfo = setupIni?.split("(?=@ )")?.find() { it.contains("provides: ${pkgName}") }
+				if(!pkgInfo){
+					throw new RuntimeException("Cannot find dependencies of [${pkgName}]")
+				}
+				
+				info("  Parsing virtual package [${pkgName}]")
+				String newPkgName=parsePackageName(pkgInfo);
+				info("    parsed as [${newPkgName}]")*/
         String newPkgName = parseVirtualPackage(pkgName)
-        //info("  Parsing virtual package ${pkgName} as ${newPkgName}")
+        info("  Parsing virtual package ${pkgName} as ${newPkgName}")
         result.add(newPkgName)
 
     }else{
@@ -166,19 +173,21 @@ def buildPackageDependencyTree(String setupIni, String pkgName, Set<String> resu
 }
 
 def parseVirtualPackage(String virtualPackage){
-    if(virtualPackage == "perl5_026")
+    if(virtualPackage.startsWith("perl5_0"))
         return "perl_base"
-    pkg = setupIniMap.find{it.value.contains("provides: ${virtualPackage}")}.key
+    pkg = setupIniMap.find{it.value.contains("provides: ${virtualPackage}")}?.key
     return pkg
+	info("virtual package $virtualPackage")
+	return virtualPackage
 }
 
 def parsePackageRequires(String pkgInfo) {
-    String requires = pkgInfo?.split("\n")?.find() { it.startsWith("requires:") }
-    return requires?.replace("requires:", "")?.trim()?.split("\\s")
+    String requires = pkgInfo?.split("\n")?.find() { it.startsWith("depends2:") }
+	requires = requires?.replaceAll(/\(.*?\)/,"")?.replaceAll(" ","")
+    return requires?.replace("depends2:", "")?.trim()?.split(",")
 }
 
 def getCygwinVersion(String setupIni){
-    //String version = setupIni?.split("(?=@)")?.find(){it.startsWith("@ cygwin")}.split("\n").find(){it.startsWith("version: ")}.replace("version:","").trim();
     String version = setupIniMap["cygwin"].split("\n").find(){it.startsWith("version: ")}.replace("version:","").trim();
     return version
 }
@@ -208,7 +217,7 @@ def parsePackagePath(String pkgInfo) {
 
 def downloadPackage(String repositoryUrl, String packagePath, File outputFolder) {
     String packageUrl = repositoryUrl + packagePath
-    String repoDomain = repositoryUrl.replaceAll(/.*\/\/([a-z\.]+)\/.*/, '$1')
+    String repoDomain = repositoryUrl.replaceAll(/.*\/\/([a-z\.-]+)\/.*/, '$1')
     String outputPath = "${repoDomain}/${packagePath}"
     File outputFile = new File(outputFolder, outputPath)
     if(outputFile.exists()){
@@ -267,16 +276,16 @@ def executeCygwin(File packagesInput, File repoFolder, File inputFolder, File ou
 
 def downloadCygwinInstaller(File outputFolder, String bitVersion) {    
     File cygwinInstaller = new File(outputFolder, "setup-${bitVersion}.exe")
-    if(!cygwinInstaller.exists()) {
+    //if(!cygwinInstaller.exists()) {
         info("Downloading Cygwin installer")
         cygwinInstaller.withOutputStream{
-            out -> new URL( "http://cygwin.com/setup-${bitVersion}.exe").withInputStream{
+            out -> new URL( "https://cygwin.com/setup-${bitVersion}.exe").withInputStream{
                 in-> out<<in
             }
         }
-    } else {
-        info("Cygwin installer alread exists, skipping the download!")
-    }
+    //} else {
+    //    info("Cygwin installer alread exists, skipping the download!")
+    //}
 
     return cygwinInstaller
 }
@@ -311,21 +320,22 @@ def findSymlinks(File cygwinFolder) {
 }
 
 def executeCmd(String command, int timeout) {
-    //info("Executing ${command}")
+    info("Executing ${command}")
     def process = command.execute()
     addShutdownHook { process.destroy() }
     //process.consumeProcessOutput(err, err)
     process.waitForProcessOutput()
+	//info("exit value ${process.exitValue()}")
     return process.exitValue()
 }
 
 
 
 //////CORE PART
-def executeCore(File cygwinFolder, File outputFolder, String babunBranch, String bitVersion) {
+def executeCore(File input, File cygwinFolder, File outputFolder, String babunBranch, String bitVersion) {
     try {
         copyCygwin(new File(cygwinFolder, "cygwin"), outputFolder, "cygwin")
-        installCore(outputFolder, babunBranch, bitVersion)
+        installCore(input, outputFolder, babunBranch, bitVersion)
     } catch (Exception ex) {
         error("ERROR: Unexpected error occurred: " + ex + " . Quitting!")
         ex.printStackTrace()
@@ -339,12 +349,7 @@ def repairSymlinks(File outputFolder) {
     executeCmd(repairSymlinksCmd, 100)
 }
 
-// -----------------------------------------------------
-// TODO - EXTERNALIZE THE INSTALLATION OF THE BABUN CORE
-// THIS SHOULD BE A SEPARATE SHELL SCRIPT
-// IT WILL ENABLE INSTALLING THE CORE ON OSX!!!
-// -----------------------------------------------------
-def installCore(File outputFolder, String babunBranch, String bitVersion) {
+def installCore(File input, File outputFolder, String babunBranch, String bitVersion) {
     // rebase dll's
     info("Installing babun core...")
     executeCmd("${outputFolder.absolutePath}/cygwin/bin/dash.exe -c '/usr/bin/rebaseall'", 5)
@@ -353,17 +358,16 @@ def installCore(File outputFolder, String babunBranch, String bitVersion) {
     String bash = "${outputFolder.absolutePath}/cygwin/bin/bash.exe -l"
 
     // checkout babun
-    String sslVerify = "git config --global http.sslverify"
     String src = "/usr/local/etc/babun/source"
-    String clone = "git clone https://github.com/kamm/babun.git ${src}"
-    String checkout = "git --git-dir='${src}/.git' --work-tree='${src}' checkout ${babunBranch}"
     executeCmd("${bash} -c \"mkdir -p /usr/local/bin\"",5)
     executeCmd("${bash} -c \"mkdir -p /usr/local/etc/babun\"",5)
-    executeCmd("${bash} -c \"${sslVerify} 'false'\"",5)
-    executeCmd("${bash} -c \"${clone}\"", 5)
-    executeCmd("${bash} -c \"${checkout}\"", 5)
-    executeCmd("${bash} -c \"${sslVerify} 'true'\"", 5)
-
+	
+	new AntBuilder().copy(todir: "${outputFolder.absolutePath}/cygwin/usr/local/etc/babun/source", quiet: true) {
+        fileset(dir: "${input.absolutePath}", defaultexcludes:"no"){
+			exclude(name: "target/")
+		}
+    }
+	
     // remove windows new line feeds
     String dos2unix = "find /usr/local/etc/babun/source/babun-core -type f -exec dos2unix {} \\; >/dev/null 2>&1"
     executeCmd("${bash} -c \"${dos2unix}\"", 5)

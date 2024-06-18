@@ -11,7 +11,7 @@ mkdir -p "$babun/external"
 mkdir -p "$babun/installed"
 
 # fix the symlinks if necessary
-bash "$babun_tools/fix_symlinks.sh"
+#bash "$babun_tools/fix_symlinks.sh" >/dev/null 2>&1
 
 # install plugins
 plugin_install "dist"
@@ -23,7 +23,6 @@ plugin_install "oh-my-zsh"
 plugin_install "git"
 plugin_install "cygdrive"
 plugin_install "ack"
-plugin_install "sdkman"
 plugin_install "xserver"
 plugin_install "dotfiles"
 plugin_install "youtube-dl"

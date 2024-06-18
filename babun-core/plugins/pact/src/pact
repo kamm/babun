@@ -81,7 +81,6 @@ function findworkspace()
 
 function getsetup() 
 {
-#
   currdir="$(pwd)"
   if test "$noscripts" == "0"
   then
@@ -259,8 +258,13 @@ function installPkg()
     
     # recursively install required packages
     
-    echo > /tmp/awk.$$ '/^requires: / {s=gensub("(requires: )?([^ ]+) ?", "\\2 ", "g", $0); print s}'
-    requires=`cat "release/$pkg/desc" | awk -f /tmp/awk.$$`
+    #echo > /tmp/awk.$$ '/^requires: / {s=gensub("(requires: )?([^ ]+) ?", "\\2 ", "g", $0); print s}'
+    echo > /tmp/awk.$$ '
+        /^depends2: / {s=gensub("(depends2: )?([^ ]+) ?", "\\2 ", "g", $0); print s}
+        /^depends: / {s=gensub("(depends2: )?([^ ]+) ?", "\\2 ", "g", $0); print s}
+        /^requires: / {s=gensub("(depends2: )?([^ ]+) ?", "\\2 ", "g", $0); print s}
+    '
+    requires=`cat "release/$pkg/desc" | awk -f /tmp/awk.$$ | sed "s/,//g"  | grep -v ^_windows`
     
     warn=0
     if ! test "-$requires-" = "--"

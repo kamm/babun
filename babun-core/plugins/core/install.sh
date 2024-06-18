@@ -86,8 +86,8 @@ if [[ "$installed_version" -le 1 ]]; then
 
 	# fix permissions in /usr/local
 	echo "Fixing permissions"
-	/bin/chmod 755 -R /usr/local
-	/bin/chmod u+rwx -R /etc
+	#/bin/chmod 755 -R /usr/local
+	#/bin/chmod 755 -R /etc
 
 
 	# fix mintty problem in the babun.bat launcher (best effort)

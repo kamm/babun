@@ -10,8 +10,8 @@ def execute() {
     try {
         checkArguments()
         (confFolder, outputFolder, setupVersion) = initEnvironment()
-        downloadPackages(confFolder, outputFolder, "x86")
-        copyPackagesListToTarget(confFolder, outputFolder, "x86")
+        downloadPackages(confFolder, outputFolder, "x86_64")
+        copyPackagesListToTarget(confFolder, outputFolder, "x86_64")
     } catch (Exception ex) {
         error("Unexpected error occurred: " + ex + " . Quitting!")
         ex.printStackTrace()
@@ -72,17 +72,15 @@ def downloadPackages(File confFolder, File outputFolder, String bitVersion) {
 }
 
 def downloadSetupIni(String repository, String bitVersion, File outputFolder) {
-    println "Downloading [setup.ini] from repository [${repository}]"
+    err.println "Downloading [setup.ini] from repository [${repository}]"
     String setupIniUrl = "${repository}/${bitVersion}/setup.ini"
-    String downloadSetupIni = "wget -c --no-check-certificate -l 2 -r -np -q --cut-dirs=3 -P " + outputFolder.getAbsolutePath() + " " + setupIniUrl    
-    executeCmd(downloadSetupIni, 5)
     String setupIniContent = setupIniUrl.toURL().text
     return setupIniContent
 }
 
 def downloadRootPackage(String repo, String setupIni, String rootPkg, Set<String> processed, File outputFolder) {
     def processedInStep = [] as Set
-    println "Processing top-level package [$rootPkg]"
+    err.println "Processing top-level package [$rootPkg]"
     def packagesToProcess = [] as Set
     try {
         buildPackageDependencyTree(setupIni, rootPkg, packagesToProcess)
@@ -91,7 +89,7 @@ def downloadRootPackage(String repo, String setupIni, String rootPkg, Set<String
             String pkgInfo = parsePackageInfo(setupIni, pkg)
             String pkgPath = parsePackagePath(pkgInfo)
             if (pkgPath) {
-                println "  Downloading package [$pkg]"
+                err.println "  Downloading package [$pkg]"
                 if (downloadPackage(repo, pkgPath, outputFolder)) {
                     processedInStep.add(pkg)
                 }
@@ -99,7 +97,7 @@ def downloadRootPackage(String repo, String setupIni, String rootPkg, Set<String
                 // packages doesn't have binary file
                 processedInStep.add(pkg)
             } else {
-                println "  Cannot find package [$pkg] in the repository"
+                err.println "  Cannot find package [$pkg] in the repository"
                 processedInStep = [] as Set // reset as the tree could not be fetched
                 break;
             }
@@ -138,8 +136,8 @@ def buildPackageDependencyTree(String setupIni, String pkgName, Set<String> resu
 }
 
 def parsePackageRequires(String pkgInfo) {
-    String requires = pkgInfo?.split("\n")?.find() { it.startsWith("requires:") }
-    return requires?.replace("requires:", "")?.trim()?.split("\\s")
+    String requires = pkgInfo?.split("\n")?.find() { it.startsWith("depends2:") }
+    return requires?.replace("depends2:", "")?.replace(",","")?.replace(" _windows ( >= 6.1 )","")?.replace(" _windows ( >= 6.3 )","")?.trim()?.split("\\s")
 }
 
 def getCygwinVersion(String setupIni){
@@ -163,6 +161,7 @@ def parsePackagePath(String pkgInfo) {
 }
 
 def downloadPackage(String repositoryUrl, String packagePath, File outputFolder) {
+	err.println packagePath
     String packageUrl = repositoryUrl + packagePath
     String downloadCommand = "wget -c -l 2 -r -np -q --no-check-certificate --cut-dirs=3 -P " + outputFolder.getAbsolutePath() + " " + packageUrl
     if (executeCmd(downloadCommand, 5) != 0) {

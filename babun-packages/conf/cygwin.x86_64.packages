@@ -1,3 +1,6 @@
+_autorebase
+vim-minimal
+man-db
 alternatives
 attr
 automake
@@ -31,6 +34,7 @@ groff
 gzip
 hostname
 ipc-utils
+jq
 keychain
 less
 libsasl2_3
@@ -51,7 +55,6 @@ pcre
 perl
 ping
 pkg-config
-procps
 rebase
 rsync
 run

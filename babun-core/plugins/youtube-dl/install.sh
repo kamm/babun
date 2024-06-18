@@ -8,13 +8,13 @@ curl -L https://yt-dl.org/downloads/2021.12.17/youtube-dl.exe > /usr/local/bin/y
 chmod 755 /usr/local/bin/yt-dlp.exe
 chmod 755 /usr/local/bin/youtube-dl.exe
 ffmpeg="ffmpeg-5.0-essentials_build.zip"
-curl -L https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-5.0-essentials_build.zip > /tmp/${ffmpeg} 2>/dev/null
+curl -L https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-5.1.2-essentials_build.zip > /tmp/${ffmpeg} 2>/dev/null
 
-unzip -j /tmp/${ffmpeg} ffmpeg-5.0-essentials_build/bin/ffmpeg.exe >/dev/null 2>&1
-unzip -j /tmp/${ffmpeg} ffmpeg-5.0-essentials_build/bin/ffprobe.exe >/dev/null 2>&1
-unzip -j /tmp/${ffmpeg} ffmpeg-5.0-essentials_build/bin/ffplay.exe >/dev/null 2>&1
+unzip -j /tmp/${ffmpeg} ffmpeg-5.1.2-essentials_build/bin/ffmpeg.exe >/dev/null 2>&1
+unzip -j /tmp/${ffmpeg} ffmpeg-5.1.2-essentials_build/bin/ffprobe.exe >/dev/null 2>&1
+unzip -j /tmp/${ffmpeg} ffmpeg-5.1.2-essentials_build/bin/ffplay.exe >/dev/null 2>&1
 
-rm -f /tmp/ffmpeg-5.0-essentials_build.zip
+rm -f /tmp/ffmpeg-5.1.2-essentials_build.zip
 
 mv ffprobe.exe ffplay.exe ffmpeg.exe /usr/local/bin
 

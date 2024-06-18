@@ -1,4 +1,7 @@
 #!/usr/bin/env groovy
+
+//"C:\exp\babun\setup-x86_64.exe" -O -s https://rpi.kmetrak.eu/pub/cygnus/cygwin --quiet-mode --root "C:\exp\babun\target\babun-cygwin\cygwin" --no-shortcuts --no-startmenu --no-desktop --packages alternatives,attr,automake,base-cygwin,base-files,bash,bc,bzip2,chere,coreutils,cron,crypt,csih,ctags,curl,cygutils,cygwin,dash,diffutils,dos2unix,editrights,findutils,fzf,gawk,gcc-core,gettext,git,gnutls,grep,groff,gzip,hostname,ipc-utils,keychain,less,libsasl2_3,links,login,make,man,mc,mintty,nano,nc,ncurses,openssh,openssl,p7zip,pcre,perl,perl_vendor,ping,pkg-config,procps,readline,rebase,rsync,run,sed,shutdown,tar,terminfo,time,tmux,tree,util-linux,unzip,vim,wget,which,xorg-server,xinit,zip,zsh
+
 import static java.lang.System.*
 
 execute()
@@ -54,11 +57,11 @@ def initEnvironment() {
 }
 
 def downloadCygwinInstaller(File outputFolder) {    
-    File cygwinInstaller = new File(outputFolder, "setup-x86.exe")
+    File cygwinInstaller = new File(outputFolder, "setup-x86_64.exe")
     if(!cygwinInstaller.exists()) {
         println "Downloading Cygwin installer"
         use(FileBinaryCategory) {
-            cygwinInstaller << "http://cygwin.com/setup-x86.exe".toURL()
+            cygwinInstaller << "http://cygwin.com/setup-x86_64.exe".toURL()
         }
     } else {
         println "Cygwin installer alread exists, skipping the download!";
@@ -68,11 +71,10 @@ def downloadCygwinInstaller(File outputFolder) {
 }
 
 def installCygwin(File cygwinInstaller, File repoFolder, File cygwinFolder, File pkgsFile) {    
-    println "Installing cygwin"
+    err.println "Installing cygwin"
     String pkgs = pkgsFile.text.trim().replaceAll("(\\s)+", ",")    
-    println "Packages to install: ${pkgs}"
+    err.println "Packages to install: ${pkgs}"
     String installCommand = "\"${cygwinInstaller.absolutePath}\" " +
-            "--quiet-mode " +
             "--local-install " +
             "--local-package-dir \"${repoFolder.absolutePath}\" " +
             "--root \"${cygwinFolder.absolutePath}\" " +
@@ -80,7 +82,7 @@ def installCygwin(File cygwinInstaller, File repoFolder, File cygwinFolder, File
             "--no-startmenu " +
             "--no-desktop " +
             "--packages " + pkgs
-    println installCommand
+    err.println installCommand
     executeCmd(installCommand, 10)
 }
 

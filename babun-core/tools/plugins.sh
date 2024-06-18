@@ -27,7 +27,7 @@ function plugin_installed_ok {
 	local installed="$babun/installed/$plugin_name"
 	if [[ -f "$installed" ]]; then		
 		typeset -i installed_version
-		local installed_version=$(cat "$installed" || echo "0") 	
+		local installed_version=$(cat "$installed" 2>/dev/null || echo "0") 	
 	fi
 
 	if [[ -z "$installed_version" ]]; then
@@ -72,7 +72,7 @@ function plugin_install {
 
 function plugin_install_home {
 	local plugin_name="$1"
-	local installed_version=$(cat "$babun/installed/$plugin_name" || echo "0") 
+	local installed_version=$(cat "$babun/installed/$plugin_name" 2>/dev/null || echo "0") 
 	echo "Installing plugin's home [$plugin_name]"
 	local plugin_desc="$babun/source/babun-core/plugins/$plugin_name/plugin.desc"
 	if [[ ! -f "$plugin_desc" ]]; then	

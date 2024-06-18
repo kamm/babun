@@ -32,5 +32,5 @@ fi
 /bin/mkgroup -l -c > /etc/group 2>/dev/null
 
 # fix file permissions in /usr/local
-/bin/chmod 755 -R /usr/local
-/bin/chmod u+rwx -R /etc
+#/bin/chmod 755 -R /usr/local
+#/bin/chmod u+rwx -R /etc

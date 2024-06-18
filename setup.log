@@ -1,0 +1,16 @@
+2023/10/05 18:38:44 Starting cygwin install, version 2.926
+2023/10/05 18:38:44 User has backup/restore rights
+2023/10/05 18:38:44 User has symlink creation right
+2023/10/05 18:38:44 io_stream_cygfile: fopen(/etc/setup/setup.rc) failed 2 No such file or directory
+2023/10/05 18:38:44 Current Directory: E:\babun
+2023/10/05 18:38:49 mbox : Are you sure you want to exit setup? Any current download or installation will be aborted.
+2023/10/05 18:38:50 io_stream_cygfile: fopen(/etc/setup/setup.rc) failed 2 No such file or directory
+2023/10/05 18:38:50 Ending cygwin install
+2023/10/05 20:02:48 Starting cygwin install, version 2.926
+2023/10/05 20:02:48 User has backup/restore rights
+2023/10/05 20:02:48 User has symlink creation right
+2023/10/05 20:02:48 io_stream_cygfile: fopen(/etc/setup/setup.rc) failed 2 No such file or directory
+2023/10/05 20:02:48 Current Directory: E:\babun\target\babun-packages
+2023/10/05 20:02:55 mbox : Are you sure you want to exit setup? Any current download or installation will be aborted.
+2023/10/05 20:02:57 io_stream_cygfile: fopen(/etc/setup/setup.rc) failed 2 No such file or directory
+2023/10/05 20:02:57 Ending cygwin install

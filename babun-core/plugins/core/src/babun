@@ -28,9 +28,10 @@ function usage()
 function version()
 {
   echo "babun version $(cat $babun/installed/babun 2> /dev/null || echo '1.0.1 ???')"
+  echo "Build on: $(cat /usr/local/etc/babun.build)"
   echo "Originally created by Tom Bujok (@tombujok) and Lukasz Pielak (@lukaszpielak)."
   echo "Currently supported by Kamil Metrak (https://github.com/kamm)"
-  echo "Copyright (c) 2014-2020."
+  echo "Copyright (c) 2014-2023."
 }
 
 function welcome()
@@ -51,7 +52,7 @@ function welcome()
   echo -e "There are a couple of plugins installed by default: oh-my-zsh, pact, cacert, etc."
   echo -e "There are also a lot of dev tools such as git, sdkman, unix utils, etc"
   echo -e "If you would like to contribute, code up a plugin or report an issue just"
-  echo -e "go to GitHub: https://github.com/babun/babun"
+  echo -e "go to GitHub: https://github.com/kamm/babun"
   echo -e ""
   echo -e "If you like the project, star it on GitHub and follow us on twitter!"
   echo -e "Originally created Tom Bujok (@tombujok) and Lukasz Pielak (@lukaszpielak)."
